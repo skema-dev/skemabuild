@@ -1,13 +1,38 @@
 #!/bin/bash
 
+function add_env_sh() {
+    result=$(cat $1 | grep "SKEMA_HOME")
+    if [[ "$result" != "" ]]
+    then
+        echo ""
+    else
+        echo 'export SKEMA_HOME="${HOME}/.skema/bin"' >> $1
+        echo 'export PATH="${PATH}:${SKEMA_HOME}"' >> $1
+    fi
+}
+
+# common function to set PATH for different OS. zshrc for macos, bashrc and bash_profile for linux
+function set_environments() {
+     # set bash and zsh
+     if [[ -f ~/.zshrc ]]; then
+         add_env_sh ~/.zshrc
+     fi
+     if [[ -f ~/.bashrc ]]; then
+         add_env_sh ~/.bashrc
+     fi
+     if [[ -f ~/.bash_profile ]]; then
+         add_env_sh ~/.bash_profile
+     fi
+ }
+
 function install_grpc_protos() {
-    protos_dir="$HOME/.skema-dev/protos"
+    protos_dir="$HOME/.skema/protos"
     mkdir -p $protos_dir
     git clone https://github.com/googleapis/api-common-protos.git $protos_dir/google-api-common-protos --depth=1
     git clone https://github.com/envoyproxy/protoc-gen-validate.git $protos_dir/envoy-grpc-validate --depth=1
     git clone https://github.com/grpc-ecosystem/grpc-gateway.git $protos_dir/grpc-gateway --depth=1
 
-    protobuf_dir="$HOME/.skema-dev/protobuf"
+    protobuf_dir="$HOME/.skema/protobuf"
     mkdir -p $protobuf_dir
     git -C $protobuf_dir init -b main
     git -C $protobuf_dir remote add origin https://github.com/protocolbuffers/protobuf.git
@@ -25,6 +50,7 @@ function install_grpc_protos() {
     fi
 }
 
-rm -rf ~/.skema-dev
+rm -rf ~/.skema
 install_grpc_protos
+set_environments
 exit 0
