@@ -36,3 +36,11 @@ func TryMakeDir(dir string) error {
 	}
 	return nil
 }
+
+func GetHomePath() string {
+	path := os.Getenv("SKEMA_HOME")
+	if path == "" {
+		panic("SKEMA_HOME not set!")
+	}
+	return path
+}

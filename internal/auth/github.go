@@ -93,24 +93,16 @@ func (g *GithubAuth) waitForUserAuthComplete() {
 
 // Save Token
 func (g *GithubAuth) SaveTokenToFile() {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exePath := filepath.Dir(ex)
-	tokenFilepath := filepath.Join(exePath, "github/token")
+	homePath := io.GetHomePath()
+	tokenFilepath := filepath.Join(homePath, "github/token")
 
 	io.SaveToFile(tokenFilepath, []byte(g.accessToken))
 	console.Info("token save to " + tokenFilepath)
 }
 
 func (g *GithubAuth) GetLocalToken() string {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exePath := filepath.Dir(ex)
-	tokenFilepath := filepath.Join(exePath, "github/token")
-	data, err := os.ReadFile(tokenFilepath)
+	homePath := io.GetHomePath()
+	tokenFilepath := filepath.Join(homePath, "github/token")
+	data, _ := os.ReadFile(tokenFilepath)
 	return string(data)
 }

@@ -5,7 +5,7 @@ dev tools for skema
 ```
 cd cmd/cli
 go build -o sd
-./sd api init --module=test --package=pack1 --service=hello
+./sd api init --package=pack1 --service=hello
 ```
 This will generate a `hello.proto` template for protocol buffers definition  
 

@@ -13,7 +13,7 @@ import (
 var protobufTemplate string
 
 type ApiCreator interface {
-	InitProtoFile(moduleName string, packageName string, serviceName string, options []string) (string, error)
+	InitProtoFile(packageName string, serviceName string, options []string) (string, error)
 }
 
 func NewApiCreator() ApiCreator {
@@ -24,12 +24,11 @@ type creator struct {
 }
 
 func (p *creator) InitProtoFile(
-	moduleName string,
 	packageName string,
 	serviceName string,
 	options []string,
 ) (string, error) {
-	tpl := template.Must(template.New("default").Parse(protobufTemplate))
+	tpl := template.Must(template.New("default").Option("missingkey=zero").Parse(protobufTemplate))
 
 	opts := ""
 	for _, v := range options {
@@ -40,10 +39,13 @@ func (p *creator) InitProtoFile(
 	}
 
 	userValues := map[string]string{
-		"Module":  strings.ToLower(moduleName),
 		"Package": strings.ToLower(packageName),
 		"Service": strcase.ToCamel(serviceName),
 		"Options": opts,
+	}
+
+	if opts == "" {
+		userValues["Options"] = ProtocoBufOptionTplStr
 	}
 
 	var content bytes.Buffer

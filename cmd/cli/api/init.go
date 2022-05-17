@@ -12,7 +12,7 @@ import (
 
 const (
 	initDescription     = "Init API Protocol Buffers Definition"
-	initLongDescription = "sd api init --module=<module_name> --package=<package_name> --service=<service_name> --path=<output_path> --option=<protobuf options>"
+	initLongDescription = "sd api init --package=<package_name> --service=<service_name> --path=<output_path>"
 )
 
 func newInitCmd() *cobra.Command {
@@ -21,7 +21,6 @@ func newInitCmd() *cobra.Command {
 		Short: initDescription,
 		Long:  initLongDescription,
 		Run: func(c *cobra.Command, args []string) {
-			userModule, _ := c.Flags().GetString("module")
 			userPackage, _ := c.Flags().GetString("package")
 			userService, _ := c.Flags().GetString("service")
 			path, _ := c.Flags().GetString("path")
@@ -37,7 +36,6 @@ func newInitCmd() *cobra.Command {
 			apiCreator := api.NewApiCreator()
 
 			protoContent, err := apiCreator.InitProtoFile(
-				userModule,
 				userPackage,
 				userService,
 				userOptions,
@@ -52,13 +50,11 @@ func newInitCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("module", "m", "", "module name")
 	cmd.Flags().StringP("package", "p", "", "package name")
 	cmd.Flags().StringP("service", "s", "", "service name")
 	cmd.Flags().String("path", "", "proto file path")
 	cmd.Flags().String("option", "", "option for protobuf")
 
-	cmd.MarkFlagRequired("module")
 	cmd.MarkFlagRequired("package")
 	cmd.MarkFlagRequired("service")
 
