@@ -16,7 +16,7 @@ func TestCreateAPIandStub(t *testing.T) {
 
 	protoContent, err := apiCreator.InitProtoFile(packageName, serviceName, make([]string, 0))
 	assert.Nil(t, err)
-	stubs, err := stubCreator.GenerateStub(protoContent, "github.com/test/abc123", "test")
+	stubs, err := stubCreator.Generate(protoContent, "github.com/test/abc123")
 	assert.Nil(t, err)
 
 	assert.True(t, len(stubs) > 1)

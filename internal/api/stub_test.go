@@ -36,9 +36,39 @@ message HealthcheckResponse {
 }
 `
 
+func TestGetPatternValue(t *testing.T) {
+	service := api.GetServiceNameFromProto(testProtoContent)
+	assert.Equal(t, "Test1", service)
+
+	packageName := api.GetPackageNameFromProto(testProtoContent)
+	assert.Equal(t, "abc.aaa", packageName)
+
+}
+
 func TestGenerateStub(t *testing.T) {
 	creator := api.NewGoStubCreator()
-	_, err := creator.GenerateStub(testProtoContent, "github.com/skema-dev/test", "teststub")
+	stubs, err := creator.Generate(testProtoContent, "github.com/skema-dev/test")
 	assert.Nil(t, err)
 	//fmt.Printf("%v\n", result)
+	_, ok := stubs["Test1.pb.go"]
+	assert.True(t, ok)
+	_, ok = stubs["Test1.pb.gw.go"]
+	assert.True(t, ok)
+	_, ok = stubs["Test1.pb.validate.go"]
+	assert.True(t, ok)
+	_, ok = stubs["Test1_grpc.pb.go"]
+	assert.True(t, ok)
+	_, ok = stubs["Test1.proto"]
+	assert.True(t, ok)
+}
+
+func TestGenerateOpenAPI(t *testing.T) {
+	creator := api.NewOpenapiStubCreator()
+	stubs, err := creator.Generate(testProtoContent, "")
+	assert.Nil(t, err)
+
+	_, ok := stubs["Test1.proto"]
+	assert.True(t, ok)
+	_, ok = stubs["Test1.swagger.json"]
+	assert.True(t, ok)
 }

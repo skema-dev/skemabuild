@@ -45,7 +45,7 @@ func (p *creator) InitProtoFile(
 	}
 
 	if opts == "" {
-		userValues["Options"] = ProtocoBufOptionTplStr
+		userValues["Options"] = ProtocobufOptionTplStr
 	}
 
 	var content bytes.Buffer
