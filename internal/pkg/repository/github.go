@@ -43,7 +43,7 @@ func (g *GithubRepo) UploadToRepo(files map[string]string, repoUrl string, repoP
 func (g *GithubRepo) ListAvailableRepos() []string {
 	repos := make([]string, 0)
 
-	repositories, _, err := g.client.Repositories.ListAll(g.ctx, nil)
+	repositories, _, err := g.client.Repositories.List(g.ctx, g.username, nil)
 	if err != nil {
 		console.Errorf("list available github repos error: %s\n", err.Error())
 		return repos

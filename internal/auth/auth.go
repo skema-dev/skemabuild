@@ -8,5 +8,5 @@ type AuthProvider interface {
 }
 
 func NewGithubAuthProvider() AuthProvider {
-	return &GithubAuth{}
+	return &githubAuth{}
 }

@@ -16,7 +16,7 @@ var (
 	scope    = "repo, user"
 )
 
-type GithubAuth struct {
+type githubAuth struct {
 	deviceCode      string
 	userCode        string
 	verificationUrl string
@@ -25,16 +25,16 @@ type GithubAuth struct {
 
 // follow the instructions in https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#device-flow
 
-func (g *GithubAuth) StartAuthProcess() {
+func (g *githubAuth) StartAuthProcess() {
 	g.requestVerificationCode()
 	g.waitForUserAuthComplete()
 }
 
-func (g *GithubAuth) AccessToken() string {
+func (g *githubAuth) AccessToken() string {
 	return g.accessToken
 }
 
-func (g *GithubAuth) requestVerificationCode() {
+func (g *githubAuth) requestVerificationCode() {
 	// POST https://github.com/login/device/code
 	client := resty.New()
 	resp, _ := client.R().
@@ -49,7 +49,7 @@ func (g *GithubAuth) requestVerificationCode() {
 	g.verificationUrl = result["verification_uri"]
 }
 
-func (g *GithubAuth) waitForUserAuthComplete() {
+func (g *githubAuth) waitForUserAuthComplete() {
 	console.Info(fmt.Sprintf("please open url %s and input code: %s", g.verificationUrl, g.userCode))
 	console.Info("Wait for github auth ...")
 
@@ -92,7 +92,7 @@ func (g *GithubAuth) waitForUserAuthComplete() {
 }
 
 // Save Token
-func (g *GithubAuth) SaveTokenToFile() {
+func (g *githubAuth) SaveTokenToFile() {
 	homePath := io.GetHomePath()
 	tokenFilepath := filepath.Join(homePath, "github/token")
 
@@ -100,7 +100,7 @@ func (g *GithubAuth) SaveTokenToFile() {
 	console.Info("token save to " + tokenFilepath)
 }
 
-func (g *GithubAuth) GetLocalToken() string {
+func (g *githubAuth) GetLocalToken() string {
 	homePath := io.GetHomePath()
 	tokenFilepath := filepath.Join(homePath, "github/token")
 	data, _ := os.ReadFile(tokenFilepath)

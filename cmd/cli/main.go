@@ -3,6 +3,7 @@ package main
 import (
 	"skema-tool/cmd/cli/api"
 	"skema-tool/cmd/cli/auth"
+	"skema-tool/cmd/cli/repo"
 	"skema-tool/cmd/cli/service"
 
 	"github.com/spf13/cobra"
@@ -27,6 +28,7 @@ func newCmdRoot() *cobra.Command {
 	cmd.AddCommand(auth.NewCmd())
 	cmd.AddCommand(api.NewCmd())
 	cmd.AddCommand(service.NewCmd())
+	cmd.AddCommand(repo.NewCmd())
 
 	return cmd
 }
