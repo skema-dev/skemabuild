@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-const (
-	clientID = "e1b4cf22c78730794f27"
+var (
+	ClientID = ""
 	scope    = "repo, user"
 )
 
@@ -39,7 +39,7 @@ func (g *GithubAuth) requestVerificationCode() {
 	client := resty.New()
 	resp, _ := client.R().
 		SetHeader("Content-Type", "application/json").
-		SetBody([]byte(fmt.Sprintf(`{"client_id":"%s", "scope":"%s"}`, clientID, scope))).
+		SetBody([]byte(fmt.Sprintf(`{"client_id":"%s", "scope":"%s"}`, ClientID, scope))).
 		Post("https://github.com/login/device/code")
 
 	result := map[string]string{}
@@ -60,7 +60,7 @@ func (g *GithubAuth) waitForUserAuthComplete() {
 		// POST https://github.com/login/oauth/access_token
 		resp, _ := client.R().
 			SetHeader("Content-Type", "application/json").
-			SetBody([]byte(fmt.Sprintf(`{"client_id":"%s", "device_code":"%s", "grant_type":"urn:ietf:params:oauth:grant-type:device_code"}`, clientID, g.deviceCode))).
+			SetBody([]byte(fmt.Sprintf(`{"client_id":"%s", "device_code":"%s", "grant_type":"urn:ietf:params:oauth:grant-type:device_code"}`, ClientID, g.deviceCode))).
 			Post("https://github.com/login/oauth/access_token")
 
 		if resp.IsSuccess() {

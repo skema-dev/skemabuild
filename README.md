@@ -11,7 +11,7 @@ sh ./script/setup.sh
 Now build and test  
 ```
 cd cmd/cli
-go build -o sd
+go build -ldflags "-X skema-tool/internal/auth.ClientID=<github app clientid>" -o sd
 ./sd api init --package=pack1 --service=hello
 ```
 This will generate a `hello.proto` template for protocol buffers definition  
