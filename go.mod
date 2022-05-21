@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.7
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/google/go-github/v42 v42.0.0
+	github.com/google/go-github/v44 v44.1.0
 	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
 	github.com/iancoleman/strcase v0.2.0

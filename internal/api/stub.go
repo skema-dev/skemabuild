@@ -23,7 +23,7 @@ func getCommonProtos() []string {
 	protoNames := make([]string, 0)
 
 	homePath := io.GetHomePath()
-	commonProtoPath := filepath.Join(homePath, "common_protos")
+	commonProtoPath := filepath.Join(homePath, "protos")
 	includeDirs, err := ioutil.ReadDir(commonProtoPath)
 	if err != nil {
 		panic(err)
