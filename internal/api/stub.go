@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/skema-dev/skema-go/logging"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,7 +17,7 @@ const (
 )
 
 type StubCreator interface {
-	Generate(protobufContent string, packageOption string) (map[string]string, error)
+	Generate(protobufContent string) (map[string]string, error)
 }
 
 func getCommonProtos() []string {
@@ -35,14 +36,18 @@ func getCommonProtos() []string {
 	return protoNames
 }
 
-func GetOptionPackageNameFromProto(protoContent string) string {
-	reg := "package[\\s]+option=\"(?P<option_package_name>[a-zA-Z0-9.]+)\";"
+func GetOptionGoPackageNameFromProto(protoContent string) string {
+	return GetOptionPackageNameFromProto(protoContent, "go_package")
+}
+
+func GetOptionPackageNameFromProto(protoContent string, packageName string) string {
+	reg := fmt.Sprintf("option[\\s]+%s=\"(?P<option_package_name>[a-zA-Z0-9.\\-_\\/]+)\";", packageName)
 	result := pattern.GetNamedStringFromText(protoContent, reg, "option_package_name")
 	return result
 }
 
 func GetPackageNameFromProto(protoContent string) string {
-	reg := "package[\\s]+(?P<package_name>[a-zA-Z0-9.]+);"
+	reg := "package[\\s]+(?P<package_name>[a-zA-Z0-9._\\-]+);"
 	result := pattern.GetNamedStringFromText(protoContent, reg, "package_name")
 	return result
 }
@@ -69,7 +74,7 @@ func GenerateStub(content string, outputPath string, protocOpts []string, remove
 	opts = append(opts, protoFilePath)
 
 	// execute protoc
-	console.Info("exec cmd: %s",
+	logging.Debugf("exec cmd: %s\n",
 		fmt.Sprintf("protoc %s", strings.Join(opts, " ")))
 	err := console.ExecCommand("protoc", opts...)
 	if err != nil {
@@ -87,10 +92,10 @@ func GenerateStub(content string, outputPath string, protocOpts []string, remove
 			return nil
 		}
 		relativePath := strings.TrimPrefix(path, outputPath)[1:]
-		console.Infof("generated stub: %s\n", relativePath)
+		logging.Debugf("generated stub: %s\n", relativePath)
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
-			console.Errorf("failed to read %s\n", path)
+			logging.Errorf("failed to read %s\n", path)
 			return err
 		}
 		stubs[relativePath] = string(data)

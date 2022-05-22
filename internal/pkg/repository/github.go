@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/google/go-github/v44/github"
 	"github.com/google/uuid"
+	"github.com/skema-dev/skema-go/logging"
 	"golang.org/x/oauth2"
 	"skema-tool/internal/pkg/console"
 	"skema-tool/internal/pkg/pattern"
@@ -43,7 +44,7 @@ func NewGithubRepo(token string) Repository {
 }
 
 func ParseGithubUrl(url string) (string, string, string) {
-	r := "(https://){0,1}github\\.com/(?P<organization_name>[a-zA-Z0-9-_]+)/(?P<repo_name>[a-zA-Z0-9-_]+)/(tree/main/){0,1}(?P<repo_path>[a-zA-Z0-9-_]+)"
+	r := "(https://){0,1}github\\.com/(?P<organization_name>[a-zA-Z0-9-_]+)/(?P<repo_name>[a-zA-Z0-9-_]+)/(tree/main/){0,1}(?P<repo_path>[a-zA-Z0-9.\\-_\\/]+)"
 	found := pattern.GetNamedMapFromText(url, r, []string{"organization_name", "repo_name", "repo_path"})
 
 	return found["organization_name"], found["repo_name"], found["repo_path"]
@@ -51,7 +52,14 @@ func ParseGithubUrl(url string) (string, string, string) {
 
 // Most of the supporting functions are from https://github.com/google/go-github/blob/master/example/commitpr/main.go
 func (g *GithubRepo) UploadToRepo(files map[string]string, repoUrl string, forceCreateNewRepo bool) (string, error) {
+	console.Info("start parsing url")
 	organization, repoName, repoPath := ParseGithubUrl(repoUrl)
+	if organization == "" || repoName == "" {
+		return "", errors.New("incorrect github organization or repo name")
+	}
+
+	console.Info("org: %s\nrepo:%s\n", organization, repoName)
+
 	currentTime := time.Now()
 	commitMessage := fmt.Sprintf("Upload Stub at %s", currentTime.Format("2017-09-07-17-06-06"))
 	commitBranch := strings.ReplaceAll(uuid.New().String(), "-", "")
@@ -127,7 +135,8 @@ func (g *GithubRepo) ListAvailableRepos() []string {
 	return repos
 }
 
-func (g *GithubRepo) getRepository(repoName string, orgnization string, forceNewRepo bool) (*github.Repository, error) {
+func (g *GithubRepo) getRepository(repoName string, organization string, forceNewRepo bool) (*github.Repository, error) {
+	logging.Debugf("prepare github repo %s/%s", organization, repoName)
 	repo, _, err := g.client.Repositories.Get(g.ctx, g.username, repoName)
 	if err == nil {
 		return repo, nil
@@ -137,27 +146,22 @@ func (g *GithubRepo) getRepository(repoName string, orgnization string, forceNew
 		return nil, fmt.Errorf("repo %s doesn't exist", repoName)
 	}
 
-	// create new repo
+	if organization != g.username {
+		return nil, fmt.Errorf("creating new repo in orgnization should be done via github")
+	}
+
 	owner, _, err := g.client.Users.Get(g.ctx, g.username)
-	org := orgnization
-	if org == "" {
-		if *owner.Type != "User" {
-			org = *owner.Login
-		}
-	}
-
-	if org == "" {
-		return nil, fmt.Errorf("no valid orgnization specified")
-	}
 
 	// create new repo
+	console.Info("creating new repo: %s", repoName)
 	repo = &github.Repository{Owner: owner, Name: github.String(repoName)}
-	repo, _, err = g.client.Repositories.Create(g.ctx, org, repo)
+	repo, _, err = g.client.Repositories.Create(g.ctx, "", repo)
 	if err != nil {
 		return nil, err
 	}
 
 	// init repo by adding readme
+	console.Info("add readme to init")
 	file := "README.md"
 	createFileOpts := &github.RepositoryContentFileOptions{
 		Content: []byte("This repo is initialized by skema"),
@@ -222,6 +226,7 @@ func (g *GithubRepo) createRef(repoName string, ref string, sha string) (*github
 // getTree generates the tree to commit based on the given files and the commit
 // of the ref you got in getRef.
 func (g *GithubRepo) getTreeToCommit(repoName string, ref *github.Reference, rootPath string, files map[string]string) (tree *github.Tree, err error) {
+	logging.Debugf("prepare files to commit from %s", rootPath)
 	// Create a tree with what to commit.
 	entries := []*github.TreeEntry{}
 
@@ -245,6 +250,7 @@ func (g *GithubRepo) pushCommit(
 	ref *github.Reference,
 	tree *github.Tree,
 	commitMessage string) (err error) {
+	logging.Debugf("push commit to github")
 	// Get the parent commit to attach the commit to.
 	parent, _, err := g.client.Repositories.GetCommit(g.ctx, g.username, repoName, *ref.Object.SHA, nil)
 	if err != nil {
@@ -299,7 +305,7 @@ func (g *GithubRepo) createPR(
 	prDescription string,
 	commitBranch string,
 	targetBranch string) (p *github.PullRequest, err error) {
-
+	logging.Debugf("create pull request on temp branch %s", commitBranch)
 	newPR := &github.NewPullRequest{
 		Title:               &prSubject,
 		Head:                &commitBranch,
@@ -334,6 +340,7 @@ func (g *GithubRepo) mergePR(
 	repoName string,
 	pr *github.PullRequest,
 	mergeMessage string) (*github.PullRequest, error) {
+	logging.Debugf("merge pull request")
 	pullRequestNumber := *pr.Number
 	opts := &github.PullRequestOptions{
 		MergeMethod: "squash",
@@ -361,6 +368,7 @@ func (g *GithubRepo) mergePR(
 }
 
 func (g *GithubRepo) removeBranch(repoName, branchName string) error {
+	logging.Debugf("remove temp branch %s", branchName)
 	_, err := g.client.Git.DeleteRef(g.ctx, g.username, repoName, "refs/heads/"+branchName)
 	return err
 }

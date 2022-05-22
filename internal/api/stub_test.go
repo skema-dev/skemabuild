@@ -46,8 +46,8 @@ func TestGetPatternValue(t *testing.T) {
 }
 
 func TestGenerateStub(t *testing.T) {
-	creator := api.NewGoStubCreator()
-	stubs, err := creator.Generate(testProtoContent, "github.com/skema-dev/test")
+	creator := api.NewGoStubCreator("github.com/skema-dev/test")
+	stubs, err := creator.Generate(testProtoContent)
 	assert.Nil(t, err)
 	//fmt.Printf("%v\n", result)
 	_, ok := stubs["Test1.pb.go"]
@@ -64,7 +64,7 @@ func TestGenerateStub(t *testing.T) {
 
 func TestGenerateOpenAPI(t *testing.T) {
 	creator := api.NewOpenapiStubCreator()
-	stubs, err := creator.Generate(testProtoContent, "")
+	stubs, err := creator.Generate(testProtoContent)
 	assert.Nil(t, err)
 
 	_, ok := stubs["Test1.proto"]

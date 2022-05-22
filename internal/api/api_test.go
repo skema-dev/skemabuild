@@ -9,14 +9,14 @@ import (
 
 func TestCreateAPIandStub(t *testing.T) {
 	apiCreator := api.NewApiCreator()
-	stubCreator := api.NewGoStubCreator()
+	stubCreator := api.NewGoStubCreator("github.com/test/abc123")
 
 	packageName := "abc.abc"
 	serviceName := "test1"
 
 	protoContent, err := apiCreator.InitProtoFile(packageName, serviceName, make([]string, 0))
 	assert.Nil(t, err)
-	stubs, err := stubCreator.Generate(protoContent, "github.com/test/abc123")
+	stubs, err := stubCreator.Generate(protoContent)
 	assert.Nil(t, err)
 
 	assert.True(t, len(stubs) > 1)

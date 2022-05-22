@@ -1,33 +1,42 @@
 package api
 
 import (
-	"errors"
+	"bytes"
+	_ "embed"
 	"fmt"
 	"github.com/google/uuid"
 	"path/filepath"
 	"skema-tool/internal/pkg/console"
 	"skema-tool/internal/pkg/io"
+	"skema-tool/internal/pkg/repository"
 	"strings"
+	"text/template"
 )
 
-func NewGoStubCreator() StubCreator {
-	return &goStubCreator{}
+//go:embed tpl/go_mod.tpl
+var goModTemplate string
+
+func NewGoStubCreator(packageOption string) StubCreator {
+	if packageOption == "" {
+		console.Fatalf("must define go package option")
+	}
+
+	return &goStubCreator{
+		packageOption: packageOption,
+	}
 }
 
 type goStubCreator struct {
+	packageOption string
 }
 
-func (s *goStubCreator) Generate(protobufContent string, packageOption string) (map[string]string, error) {
-	if packageOption == "" {
-		return nil, errors.New("must define go_package=xxx")
-	}
-
+func (s *goStubCreator) Generate(protobufContent string) (map[string]string, error) {
 	// Create temporary path for stub files
 	homePath := io.GetHomePath()
 	tempPath := filepath.Join(homePath, "temp", "stub-gen", uuid.New().String(), "go")
 
 	// add go_package in protobuf
-	newPackageOption := fmt.Sprintf("option go_package=\"%s\";\n", packageOption)
+	newPackageOption := fmt.Sprintf("option go_package=\"%s\";\n", s.packageOption)
 	content := strings.Replace(protobufContent, ProtocobufOptionTplStr, newPackageOption, 1)
 
 	// genereate protoc arguments
@@ -51,4 +60,31 @@ func (s *goStubCreator) Generate(protobufContent string, packageOption string) (
 	}
 
 	return result, nil
+}
+
+func GetExpectedGithubGoPackageName(uploadUrl string, protobufContent string) string {
+	organization, repoName, repoPath := repository.ParseGithubUrl(uploadUrl)
+	if organization == "" || repoName == "" {
+		console.Fatalf("incorrect github url definition")
+	}
+	packageName := GetPackageNameFromProto(protobufContent)
+	packagePath := fmt.Sprintf("github.com/%s/%s/%s/%s/grpc-go", organization, repoName, repoPath, packageName)
+	return packagePath
+}
+
+func GenerateGoMod(packagePath string) string {
+	tpl := template.Must(template.New("default").Option("missingkey=zero").Parse(goModTemplate))
+
+	userValues := map[string]string{
+		"PackageAddress": strings.ToLower(packagePath),
+		"GoVersion":      "1.16",
+	}
+
+	var content bytes.Buffer
+	err := tpl.Execute(&content, userValues)
+	if err != nil {
+		return ""
+	}
+
+	return content.String()
 }

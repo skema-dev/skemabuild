@@ -3,6 +3,7 @@ package console
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os/exec"
 )
 
@@ -16,6 +17,10 @@ func Infof(format string, args ...any) {
 
 func Errorf(format string, args ...any) error {
 	return fmt.Errorf("[ERROR]"+format, args...)
+}
+
+func Fatalf(format string, args ...any) {
+	log.Fatalf(format, args...)
 }
 
 func ExecCommand(name string, arg ...string) error {

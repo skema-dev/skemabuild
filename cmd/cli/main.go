@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/skema-dev/skema-go/logging"
 	"skema-tool/cmd/cli/api"
 	"skema-tool/cmd/cli/auth"
 	"skema-tool/cmd/cli/repo"
@@ -19,6 +20,7 @@ func main() {
 }
 
 func newCmdRoot() *cobra.Command {
+	logging.Init("info", "console")
 	var cmd = &cobra.Command{
 		Use:   "sd",
 		Short: description,

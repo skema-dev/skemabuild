@@ -28,14 +28,9 @@ func (s *openapiStubCreator) tryAddGoPackageOption(content string) string {
 	return content
 }
 
-func (s *openapiStubCreator) Generate(protobufContent string, packageOption string) (map[string]string, error) {
+func (s *openapiStubCreator) Generate(protobufContent string) (map[string]string, error) {
 	content := protobufContent
-	if packageOption == "" {
-		content = s.tryAddGoPackageOption(content)
-	} else {
-		newPackageOption := fmt.Sprintf("option go_package=\"%s\";\n", packageOption)
-		content = strings.Replace(content, ProtocobufOptionTplStr, newPackageOption, 1)
-	}
+	content = s.tryAddGoPackageOption(content)
 
 	// Create temporary path for stub files
 	homePath := io.GetHomePath()
