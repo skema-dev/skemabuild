@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/skema-dev/skema-go/logging"
-	"github.com/skema-dev/skema-tool/cmd/cli/api"
-	"github.com/skema-dev/skema-tool/cmd/cli/auth"
-	"github.com/skema-dev/skema-tool/cmd/cli/repo"
-	"github.com/skema-dev/skema-tool/cmd/cli/service"
+	"github.com/skema-dev/skema-tool/cmd/st/api"
+	"github.com/skema-dev/skema-tool/cmd/st/auth"
+	"github.com/skema-dev/skema-tool/cmd/st/repo"
+	"github.com/skema-dev/skema-tool/cmd/st/service"
 
 	"github.com/spf13/cobra"
 )
