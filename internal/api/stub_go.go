@@ -62,7 +62,7 @@ func (s *goStubCreator) Generate(protobufContent string) (map[string]string, err
 	return result, nil
 }
 
-func GetExpectedGithubGoPackageName(uploadUrl string, protobufContent string) string {
+func GetExpectedGithubGoPackageUri(uploadUrl string, protobufContent string) string {
 	organization, repoName, repoPath := repository.ParseGithubUrl(uploadUrl)
 	if organization == "" || repoName == "" {
 		console.Fatalf("incorrect github url definition")

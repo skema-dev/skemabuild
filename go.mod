@@ -26,6 +26,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/likezhang-public/demo001/pb001/grpc-go/module1/pp1 v1.0.1 // indirect
+	github.com/likezhang-public/newst/tes1/com.test1/grpc-go v0.0.5 // indirect
 	github.com/likezhang-public/newst/test2/com.test/grpc-go v0.0.2 // indirect
 	github.com/likezhang-public/newst3/tes1/com.test/grpc-go v1.0.2 // indirect
 	github.com/likezhang-public/newst4/tes1/com.test/grpc-go v0.0.1 // indirect

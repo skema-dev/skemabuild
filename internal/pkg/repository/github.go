@@ -52,13 +52,10 @@ func ParseGithubUrl(url string) (string, string, string) {
 
 // Most of the supporting functions are from https://github.com/google/go-github/blob/master/example/commitpr/main.go
 func (g *GithubRepo) UploadToRepo(files map[string]string, repoUrl string, forceCreateNewRepo bool) (string, error) {
-	console.Info("start parsing url")
 	organization, repoName, repoPath := ParseGithubUrl(repoUrl)
 	if organization == "" || repoName == "" {
 		return "", errors.New("incorrect github organization or repo name")
 	}
-
-	console.Info("org: %s\nrepo:%s\n", organization, repoName)
 
 	currentTime := time.Now()
 	commitMessage := fmt.Sprintf("Upload Stub at %s", currentTime.Format("2017-09-07-17-06-06"))

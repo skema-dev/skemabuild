@@ -104,6 +104,7 @@ func GenerateStub(content string, outputPath string, protocOpts []string, remove
 
 	if removeStubFiles {
 		os.RemoveAll(outputPath)
+		os.Remove(outputPath)
 	}
 	return stubs, err
 }

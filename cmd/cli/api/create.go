@@ -33,38 +33,16 @@ func newCreateCmd() *cobra.Command {
 
 			//TODO: download remote file if input starts with http[s]://
 
-			data, _ := os.ReadFile(input)
-			content := string(data)
-
-			stubTypeArr := strings.Split(stubTypes, ",")
-			for _, stubType := range stubTypeArr {
-				stubType = strings.TrimRight(strings.TrimLeft(stubType, " "), " ")
-				outputPath := filepath.Join(output, stubType)
-				var creator api.StubCreator
-
-				switch stubType {
-				case "grpc-go":
-					creator = api.NewGoStubCreator(goOption)
-				case "openapi":
-					creator = api.NewOpenapiStubCreator()
-				default:
-					console.Errorf("unsupported stub type: %s", stubType)
-					continue
+			stubs, err := generateStubsFromProto(input, stubTypes, goOption)
+			if err != nil {
+				console.Fatalf(err.Error())
+			}
+			for path, stub := range stubs {
+				stubFilepath := filepath.Join(output, path)
+				if err = io.SaveToFile(stubFilepath, []byte(stub)); err != nil {
+					panic(err)
 				}
-
-				console.Infof("[%s]\n", stubType)
-				stubs, err := creator.Generate(content)
-				if err != nil {
-					panic(err.Error())
-				}
-
-				for filename, stub := range stubs {
-					stubFilepath := filepath.Join(outputPath, filename)
-					if err := io.SaveToFile(stubFilepath, []byte(stub)); err != nil {
-						panic(err)
-					}
-					console.Infof("%s\n", stubFilepath)
-				}
+				console.Infof("%s\n", stubFilepath)
 			}
 		},
 	}
@@ -78,4 +56,41 @@ func newCreateCmd() *cobra.Command {
 	cmd.MarkFlagRequired("input")
 
 	return cmd
+}
+
+func generateStubsFromProto(protoPath string, stubTypes string, goOption string) (stubs map[string]string, err error) {
+	stubs = make(map[string]string)
+	data, err := os.ReadFile(protoPath)
+	if err != nil {
+		console.Fatalf(err.Error())
+	}
+	content := string(data)
+	stubTypeArr := strings.Split(stubTypes, ",")
+
+	for _, stubType := range stubTypeArr {
+		stubType = strings.TrimRight(strings.TrimLeft(stubType, " "), " ")
+		var creator api.StubCreator
+
+		switch stubType {
+		case "grpc-go":
+			creator = api.NewGoStubCreator(goOption)
+		case "openapi":
+			creator = api.NewOpenapiStubCreator()
+		default:
+			console.Errorf("unsupported stub type: %s", stubType)
+			continue
+		}
+
+		contents, err := creator.Generate(content)
+		if err != nil {
+			console.Fatalf(err.Error())
+		}
+
+		for k, v := range contents {
+			stubFilePath := filepath.Join(stubType, k)
+			stubs[stubFilePath] = v
+		}
+	}
+
+	return stubs, nil
 }
