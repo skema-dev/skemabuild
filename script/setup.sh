@@ -60,4 +60,7 @@ function install_grpc_protos() {
 rm -rf ~/.skema
 install_grpc_protos
 set_environments
+
+go install github.com/skema-dev/skema-tool/cmd/st
+
 exit 0
