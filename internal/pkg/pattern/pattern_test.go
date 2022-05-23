@@ -1,9 +1,9 @@
 package pattern_test
 
 import (
+	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"skema-tool/internal/pkg/pattern"
 	"testing"
 )
 

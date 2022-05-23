@@ -1,10 +1,10 @@
 package api
 
 import (
+	"github.com/skema-dev/skema-tool/internal/api"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/io"
 	"path/filepath"
-	"skema-tool/internal/api"
-	"skema-tool/internal/pkg/console"
-	"skema-tool/internal/pkg/io"
 	"strings"
 
 	"github.com/spf13/cobra"

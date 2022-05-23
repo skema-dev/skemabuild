@@ -3,12 +3,12 @@ package api
 import (
 	"fmt"
 	"github.com/skema-dev/skema-go/logging"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/io"
+	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"skema-tool/internal/pkg/console"
-	"skema-tool/internal/pkg/io"
-	"skema-tool/internal/pkg/pattern"
 	"strings"
 )
 

@@ -1,10 +1,10 @@
 package repo
 
 import (
+	"github.com/skema-dev/skema-tool/internal/auth"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/repository"
 	"github.com/spf13/cobra"
-	"skema-tool/internal/auth"
-	"skema-tool/internal/pkg/console"
-	"skema-tool/internal/pkg/repository"
 )
 
 const (

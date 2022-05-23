@@ -2,12 +2,12 @@ package api
 
 import (
 	"github.com/skema-dev/skema-go/logging"
+	"github.com/skema-dev/skema-tool/internal/api"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/io"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
-	"skema-tool/internal/api"
-	"skema-tool/internal/pkg/console"
-	"skema-tool/internal/pkg/io"
 	"strings"
 )
 

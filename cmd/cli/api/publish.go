@@ -3,14 +3,14 @@ package api
 import (
 	"fmt"
 	"github.com/skema-dev/skema-go/logging"
+	"github.com/skema-dev/skema-tool/internal/api"
+	"github.com/skema-dev/skema-tool/internal/auth"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/repository"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"skema-tool/internal/api"
-	"skema-tool/internal/auth"
-	"skema-tool/internal/pkg/console"
-	"skema-tool/internal/pkg/repository"
 	"strings"
 )
 

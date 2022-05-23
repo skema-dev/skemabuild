@@ -1,8 +1,8 @@
 package api_test
 
 import (
+	"github.com/skema-dev/skema-tool/internal/api"
 	"github.com/stretchr/testify/assert"
-	"skema-tool/internal/api"
 	"testing"
 )
 

@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/io"
 	"os"
 	"path/filepath"
-	"skema-tool/internal/pkg/console"
-	"skema-tool/internal/pkg/io"
 	"time"
 )
 

@@ -7,9 +7,9 @@ import (
 	"github.com/google/go-github/v44/github"
 	"github.com/google/uuid"
 	"github.com/skema-dev/skema-go/logging"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
 	"golang.org/x/oauth2"
-	"skema-tool/internal/pkg/console"
-	"skema-tool/internal/pkg/pattern"
 	"strings"
 	"time"
 )
