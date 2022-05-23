@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	ClientID = ""
+	ClientID = "e1b4cf22c78730794f27"
 	scope    = "repo, user"
 )
 

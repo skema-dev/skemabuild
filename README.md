@@ -11,7 +11,7 @@ sh ./script/setup.sh
 Now build and test(The following example is using my own sample repo. Change with your own account and repo)
 ```shell
 cd cmd/cli
-go build -ldflags "-X skema-tool/internal/auth.ClientID=<github app clientid>" -o st
+go build -o st
 
 # craete an initial protocol buffers file
 ./st api init --package=pack1 --service=hello
