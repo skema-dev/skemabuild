@@ -1,4 +1,4 @@
-module skema-tool
+module github.com/skema-dev/skema-tool
 
 go 1.18
 
