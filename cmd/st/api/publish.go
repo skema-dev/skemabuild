@@ -2,16 +2,17 @@ package api
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/skema-dev/skema-go/logging"
 	"github.com/skema-dev/skema-tool/internal/api"
 	"github.com/skema-dev/skema-tool/internal/auth"
 	"github.com/skema-dev/skema-tool/internal/pkg/console"
 	"github.com/skema-dev/skema-tool/internal/pkg/repository"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -92,7 +93,10 @@ func publishFromProto(protoPath string, stubTypes string, uploadUrl string, vers
 	console.Info("new version published: go get %s@%s", expectedPackageUri, version)
 }
 
-func loadUploadingStubs(inputPath string, uploadUrl string) (stubs map[string]string, goPackage string, originalPackageName string, err error) {
+func loadUploadingStubs(
+	inputPath string,
+	uploadUrl string,
+) (stubs map[string]string, goPackage string, originalPackageName string, err error) {
 	// iterate temp path, and return all file contents
 	// IMPORTANT: generate and insert go.mod for go package
 	stubs = make(map[string]string)
@@ -116,13 +120,18 @@ func loadUploadingStubs(inputPath string, uploadUrl string) (stubs map[string]st
 		stubs[relativePath] = string(data)
 
 		if goPackage == "" {
-			if strings.HasPrefix(relativePath, "grpc-go") && strings.HasSuffix(relativePath, ".proto") {
+			if strings.HasPrefix(relativePath, "grpc-go") &&
+				strings.HasSuffix(relativePath, ".proto") {
 				// make sure go package definition is compatible with upload url
 				content := stubs[relativePath]
 				goPackage = api.GetOptionGoPackageNameFromProto(content)
 				expectedPackage := api.GetExpectedGithubGoPackageUri(uploadUrl, content)
 				if goPackage != expectedPackage {
-					console.Fatalf("Incorrect package definition\nCurrent go_package=\"%s\"\nExpected go_package=\"%s\"\n", goPackage, expectedPackage)
+					console.Fatalf(
+						"Incorrect package definition\nCurrent go_package=\"%s\"\nExpected go_package=\"%s\"\n",
+						goPackage,
+						expectedPackage,
+					)
 				}
 				goModContent := api.GenerateGoMod(goPackage)
 				stubs["grpc-go/go.mod"] = goModContent

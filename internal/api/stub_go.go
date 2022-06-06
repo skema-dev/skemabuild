@@ -4,13 +4,14 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"path/filepath"
+	"strings"
+	"text/template"
+
 	"github.com/google/uuid"
 	"github.com/skema-dev/skema-tool/internal/pkg/console"
 	"github.com/skema-dev/skema-tool/internal/pkg/io"
 	"github.com/skema-dev/skema-tool/internal/pkg/repository"
-	"path/filepath"
-	"strings"
-	"text/template"
 )
 
 //go:embed tpl/go_mod.tpl
@@ -68,7 +69,13 @@ func GetExpectedGithubGoPackageUri(uploadUrl string, protobufContent string) str
 		console.Fatalf("incorrect github url definition")
 	}
 	packageName := GetPackageNameFromProto(protobufContent)
-	packagePath := fmt.Sprintf("github.com/%s/%s/%s/%s/grpc-go", organization, repoName, repoPath, packageName)
+	packagePath := fmt.Sprintf(
+		"github.com/%s/%s/%s/%s/grpc-go",
+		organization,
+		repoName,
+		repoPath,
+		packageName,
+	)
 	return packagePath
 }
 

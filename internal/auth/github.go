@@ -3,12 +3,13 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/io"
 )
 
 var (
@@ -50,7 +51,9 @@ func (g *githubAuth) requestVerificationCode() {
 }
 
 func (g *githubAuth) waitForUserAuthComplete() {
-	console.Info(fmt.Sprintf("please open url %s and input code: %s", g.verificationUrl, g.userCode))
+	console.Info(
+		fmt.Sprintf("please open url %s and input code: %s", g.verificationUrl, g.userCode),
+	)
 	console.Info("After github auth is done, press ENTER key to continue...")
 	fmt.Scanln()
 

@@ -1,14 +1,15 @@
 package api
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/skema-dev/skema-go/logging"
 	"github.com/skema-dev/skema-tool/internal/api"
 	"github.com/skema-dev/skema-tool/internal/pkg/console"
 	"github.com/skema-dev/skema-tool/internal/pkg/io"
 	"github.com/spf13/cobra"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -58,7 +59,11 @@ func newCreateCmd() *cobra.Command {
 	return cmd
 }
 
-func generateStubsFromProto(protoPath string, stubTypes string, goOption string) (stubs map[string]string, err error) {
+func generateStubsFromProto(
+	protoPath string,
+	stubTypes string,
+	goOption string,
+) (stubs map[string]string, err error) {
 	stubs = make(map[string]string)
 	data, err := os.ReadFile(protoPath)
 	if err != nil {

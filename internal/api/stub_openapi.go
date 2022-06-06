@@ -2,10 +2,11 @@ package api
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
 	"path/filepath"
 	"strings"
+
+	"github.com/google/uuid"
+	"github.com/skema-dev/skema-tool/internal/pkg/io"
 )
 
 func NewOpenapiStubCreator() StubCreator {

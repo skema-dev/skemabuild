@@ -1,9 +1,10 @@
 package api_test
 
 import (
+	"testing"
+
 	"github.com/skema-dev/skema-tool/internal/api"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const testProtoContent = `

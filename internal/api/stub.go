@@ -2,14 +2,15 @@ package api
 
 import (
 	"fmt"
-	"github.com/skema-dev/skema-go/logging"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
-	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/skema-dev/skema-go/logging"
+	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skema-tool/internal/pkg/io"
+	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
 )
 
 const (
@@ -41,7 +42,10 @@ func GetOptionGoPackageNameFromProto(protoContent string) string {
 }
 
 func GetOptionPackageNameFromProto(protoContent string, packageName string) string {
-	reg := fmt.Sprintf("option[\\s]+%s=\"(?P<option_package_name>[a-zA-Z0-9.\\-_\\/]+)\";", packageName)
+	reg := fmt.Sprintf(
+		"option[\\s]+%s=\"(?P<option_package_name>[a-zA-Z0-9.\\-_\\/]+)\";",
+		packageName,
+	)
 	result := pattern.GetNamedStringFromText(protoContent, reg, "option_package_name")
 	return result
 }
@@ -58,7 +62,12 @@ func GetServiceNameFromProto(protoContent string) string {
 	return result
 }
 
-func GenerateStub(content string, outputPath string, protocOpts []string, removeStubFiles bool) (map[string]string, error) {
+func GenerateStub(
+	content string,
+	outputPath string,
+	protocOpts []string,
+	removeStubFiles bool,
+) (map[string]string, error) {
 	// add go_package in protobuf
 	serviceName := GetServiceNameFromProto(content)
 	protoFilePath := filepath.Join(outputPath, serviceName+".proto")

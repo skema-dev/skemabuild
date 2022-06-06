@@ -3,11 +3,22 @@ dev tools for skema.
 Generate stubs and service code automatically from a single protobuf file.  
 
 ## Quick Start
+
+1. Installation  
 First, make sure you have golang installed.  
 Then setup necessary protocol buffers related tools:  
 ```shell
 curl -L https://raw.githubusercontent.com/skema-dev/skema-tool/main/script/setup.sh | bash
 ```
+
+2. Get Github Device Auth
+```
+st auth
+```
+You'll be prompted to open github device auth URL and input the token. Then just press Enter to save the github token on your local device.  
+
+
+3. Init and Publish Protobuf API  
 Now run and test(The following example is using my own sample repo. Change with your own account and repo)
 ```shell
 # create an initial protocol buffers file
@@ -30,4 +41,13 @@ st api publish --proto=./hello.proto --url  https://github.com/likezhang-public/
 
 go get github.com/likezhang-public/newst/test2/com.test/grpc-go@v0.0.2
 ```
+
+4. Generate gRPC Service Code  
+Now it's the final step: generate runnable gRPC service code automatically!  
+Just use the following example to specify the protobuf file you published online  
+```
+st service create --proto https://github.com/likezhang-public/newst/blob/main/test2/com.test/grpc-go/Hello1.proto
+```
+
+
 

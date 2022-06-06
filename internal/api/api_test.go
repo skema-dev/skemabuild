@@ -1,10 +1,11 @@
 package api_test
 
 import (
-	"github.com/skema-dev/skema-tool/internal/api"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/skema-dev/skema-tool/internal/api"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateAPIandStub(t *testing.T) {
