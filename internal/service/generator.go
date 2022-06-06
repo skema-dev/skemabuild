@@ -45,6 +45,8 @@ func (g *grpcGoGenerator) getTplContents(tpl string) map[string]string {
 		tplPath = fmt.Sprintf("%s/%s", defaultHostPath, tpl)
 		fromSkemaTemplateRepo = true
 	}
+	console.Info("download code template from " + tplPath)
+
 	authProvider := auth.NewGithubAuthProvider()
 	repo := repository.NewGithubRepo(authProvider.GetLocalToken())
 	repoName, repoPath, organization := GetGithubContentLocation(tplPath)
@@ -85,6 +87,7 @@ func (g *grpcGoGenerator) parseFilename(tplFilepathName string, userParameters m
 
 func (g *grpcGoGenerator) apply(tpls map[string]string, parameters *RpcParameters, userParameters map[string]string) map[string]string {
 	result := make(map[string]string)
+	console.Info("generating grpc service code...")
 	for tplFilepathName, tplContent := range tpls {
 		filename := g.parseFilename(tplFilepathName, userParameters)
 		filename = strings.TrimSuffix(filename, ".tpl")

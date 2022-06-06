@@ -48,6 +48,7 @@ func newCreateCmd() *cobra.Command {
 					console.Fatalf("failed to initiate github repo")
 				}
 				repoName, repoPath, _ := service.GetGithubContentLocation(protoUrl)
+				console.Info("get remote proto on github: %s", protoUrl)
 				console.Info("Repo: %s\nPath: %s", repoName, repoPath)
 
 				content, err := repo.GetContents(repoName, repoPath)
@@ -62,6 +63,7 @@ func newCreateCmd() *cobra.Command {
 				)
 			} else {
 				// get proto by regular http
+				console.Info("get remote proto: %s", protoUrl)
 				client := resty.New()
 				resp, _ := client.R().
 					Get(protoUrl)
@@ -69,8 +71,6 @@ func newCreateCmd() *cobra.Command {
 				rpcParameters = service.GetRpcParameters(content, goModule, goVersion, serviceName)
 			}
 			rpcParameters.HttpEnabled = httpEnabled
-
-			console.Infof("http: %t\n", httpEnabled)
 
 			generator := service.NewGrpcGoGenerator()
 			contents := generator.CreateCodeContent(tpl, rpcParameters, userParameters)
