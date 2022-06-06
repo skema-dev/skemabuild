@@ -87,7 +87,7 @@ func newCreateCmd() *cobra.Command {
 	cmd.Flags().StringP("module", "m", "", "go module name")
 	cmd.Flags().StringP("goversion", "v", "1.16", "go version")
 	cmd.Flags().StringP("service", "s", "", "service name")
-	cmd.Flags().StringP("tpl", "t", "simple", "template name or url")
+	cmd.Flags().StringP("tpl", "t", "standard", "template name or url")
 	cmd.Flags().String("http", "true", "enable http or not")
 	cmd.Flags().StringP("output", "o", "", "output path")
 	cmd.MarkFlagRequired("proto")
