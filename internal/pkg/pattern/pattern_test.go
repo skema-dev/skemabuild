@@ -114,3 +114,40 @@ func (s *testSuite) TestFindUrlPattern() {
 	assert.Equal(s.T(), "ccc", found["repo_name"])
 	assert.Equal(s.T(), "cc1", found["repo_path"])
 }
+
+func (s *testSuite) TestFindRepoPathPattern() {
+	r := "https://github\\.com/(?P<organization_name>[a-zA-Z0-9-_]+)/(?P<repo_name>[a-zA-Z0-9-_]+)/(blob/main/){0,1}(?P<repo_path>[a-zA-Z0-9-_/.]+)"
+
+	tests := []struct {
+		content string
+		pattern string
+		name    string
+		expect  string
+	}{
+		{
+			content: "https://github.com/test-org/test-repo/blob/main/test004/abc/a123/test.proto",
+			pattern: r,
+			name:    "organization_name",
+			expect:  "test-org",
+		},
+		{
+			content: "https://github.com/test-org/test-repo/blob/main/test004/abc/a123/test.proto",
+			pattern: r,
+			name:    "repo_name",
+			expect:  "test-repo",
+		},
+		{
+			content: "https://github.com/test-org/test-repo/blob/main/test004/abc/a123/test.proto",
+			pattern: r,
+			name:    "repo_path",
+			expect:  "test004/abc/a123/test.proto",
+		},
+	}
+
+	for _, tt := range tests {
+		s.T().Run(tt.name, func(t *testing.T) {
+			result := pattern.GetNamedStringFromText(tt.content, tt.pattern, tt.name)
+			assert.Equal(s.T(), tt.expect, result)
+		})
+	}
+}

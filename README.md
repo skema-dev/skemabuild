@@ -10,7 +10,7 @@ curl -L https://raw.githubusercontent.com/skema-dev/skema-tool/main/script/setup
 ```
 Now run and test(The following example is using my own sample repo. Change with your own account and repo)
 ```shell
-# craete an initial protocol buffers file
+# create an initial protocol buffers file
 st api init --package=pack1 --service=hello
 
 # create stubs for grpc-go and openapi, using protobuf file Hello1.proto, and output to ./stub-test

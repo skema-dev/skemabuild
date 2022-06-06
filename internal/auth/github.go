@@ -51,7 +51,8 @@ func (g *githubAuth) requestVerificationCode() {
 
 func (g *githubAuth) waitForUserAuthComplete() {
 	console.Info(fmt.Sprintf("please open url %s and input code: %s", g.verificationUrl, g.userCode))
-	console.Info("Wait for github auth ...")
+	console.Info("After github auth is done, press ENTER key to continue...")
+	fmt.Scanln()
 
 	client := resty.New()
 	sleepTime := 2

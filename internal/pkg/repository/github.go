@@ -10,6 +10,7 @@ import (
 	"github.com/skema-dev/skema-tool/internal/pkg/console"
 	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
 	"golang.org/x/oauth2"
+	"log"
 	"strings"
 	"time"
 )
@@ -368,4 +369,50 @@ func (g *GithubRepo) removeBranch(repoName, branchName string) error {
 	logging.Debugf("remove temp branch %s", branchName)
 	_, err := g.client.Git.DeleteRef(g.ctx, g.username, repoName, "refs/heads/"+branchName)
 	return err
+}
+
+// GetContents: travel all subdirectories for path (DFS search)
+func (g *GithubRepo) GetContents(
+	repoName, path string,
+) (result map[string]string, err error) {
+	op := &github.RepositoryContentGetOptions{}
+	fileContent, directoryContent, _, err := g.client.Repositories.GetContents(g.ctx,
+		g.username, repoName, path, op)
+	if err != nil {
+		return nil, err
+	}
+
+	result = map[string]string{}
+
+	// repoPath is a single file
+	if fileContent != nil && *fileContent.Type == "file" {
+		// path is for a single file
+		rawContent, err := fileContent.GetContent()
+		if err != nil {
+			log.Printf("ERROR: %s\n", err.Error())
+		} else {
+			result[path] = rawContent
+		}
+
+		return result, nil
+	}
+
+	// repoPath is a directory
+	for _, content := range directoryContent {
+		if *content.Type == "dir" || *content.Type == "file" {
+			// recursively load subdirectory content
+			subPath := path + "/" + *content.Name
+			subContents, e := g.GetContents(repoName, subPath)
+			if e != nil {
+				log.Printf("error when reading %s: %s\n", subPath, e.Error())
+				continue
+			}
+
+			for k, v := range subContents {
+				result[k] = v
+			}
+		}
+	}
+
+	return result, nil
 }
