@@ -98,7 +98,7 @@ func (r *localRepo) checkExistingTag(tag string) {
 func (r *localRepo) setTag(tag string) (bool, error) {
 	r.checkExistingTag(tag)
 
-	console.Infof("Set tag %s", tag)
+	console.Info("Set tag %s", tag)
 	h, err := r.repo.Head()
 	checkIfError(err)
 
