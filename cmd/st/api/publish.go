@@ -34,15 +34,17 @@ func newPublishCmd() *cobra.Command {
 				logging.Init("debug", "console")
 			}
 			stubTypes, _ := c.Flags().GetString("type")
+			username, _ := c.Flags().GetString("username")
+			password, _ := c.Flags().GetString("password")
 
 			if stub != "" && proto != "" {
 				console.Fatalf("cannot specify both stub and proto!")
 			}
 
 			if stub != "" {
-				publishFromStubs(stub, uploadUrl, version)
+				publishFromStubs(stub, uploadUrl, version, username, password)
 			} else if proto != "" {
-				publishFromProto(proto, stubTypes, uploadUrl, version)
+				publishFromProto(proto, stubTypes, uploadUrl, version, username, password)
 			}
 		},
 	}
@@ -51,6 +53,8 @@ func newPublishCmd() *cobra.Command {
 	cmd.Flags().StringP("url", "u", "", "github url to upload")
 	cmd.Flags().String("version", "v", "version to be published")
 	cmd.Flags().StringP("type", "t", "grpc-go,openapi", "stub types to generate.")
+	cmd.Flags().String("username", "", "git username for http auth")
+	cmd.Flags().String("password", "", "git password for http auth")
 	cmd.Flags().Bool("debug", false, "enable debug output")
 
 	cmd.MarkFlagRequired("url")
@@ -59,7 +63,13 @@ func newPublishCmd() *cobra.Command {
 	return cmd
 }
 
-func publishFromStubs(stubPath string, uploadUrl string, version string) {
+func publishFromStubs(
+	stubPath string,
+	uploadUrl string,
+	version string,
+	username string,
+	password string,
+) {
 	stubs, goPackage, originalPackageName, err := loadUploadingStubs(stubPath, uploadUrl)
 	if err != nil {
 		console.Fatalf("Not able to load local stubs from %s. %s", stubPath, err.Error())
@@ -72,14 +82,21 @@ func publishFromStubs(stubPath string, uploadUrl string, version string) {
 		uploadGithubStubsAndTagVersion(stubUploadUrl, stubs, version)
 	default:
 		stubRepoPath := fmt.Sprintf("%s/%s", uploadUrl, originalPackageName)
-		uploadLocalStubsAndTagVersion(stubRepoPath, stubs, version)
+		uploadLocalStubsAndTagVersion(stubRepoPath, stubs, version, username, password)
 	}
 
 	// output the new version to be imported in go project
 	console.Info("new version published: go get %s@%s", goPackage, version)
 }
 
-func publishFromProto(protoPath string, stubTypes string, uploadUrl string, version string) {
+func publishFromProto(
+	protoPath string,
+	stubTypes string,
+	uploadUrl string,
+	version string,
+	username string,
+	password string,
+) {
 	data, err := os.ReadFile(protoPath)
 	if err != nil {
 		console.Fatalf(err.Error())
@@ -109,7 +126,7 @@ func publishFromProto(protoPath string, stubTypes string, uploadUrl string, vers
 
 		// attach original package name after given path in github repo
 		stubRepoPath := fmt.Sprintf("%s/%s", uploadUrl, api.GetPackageNameFromProto(protoContent))
-		uploadLocalStubsAndTagVersion(stubRepoPath, stubs, version)
+		uploadLocalStubsAndTagVersion(stubRepoPath, stubs, version, username, password)
 
 		// output the new version to be imported in go project
 		console.Info("new version published: go get %s@%s", expectedPackageUri, version)
@@ -172,7 +189,8 @@ func loadUploadingStubs(
 }
 
 func getRepoTypeFromUrl(uploadUrl string) string {
-	if strings.HasPrefix(uploadUrl, "http://github.com") || strings.HasPrefix(uploadUrl, "https://github.com") {
+	if strings.HasPrefix(uploadUrl, "http://github.com") ||
+		strings.HasPrefix(uploadUrl, "https://github.com") {
 		return "github"
 	}
 
@@ -201,13 +219,19 @@ func uploadGithubStubsAndTagVersion(stubUploadUrl string, stubs map[string]strin
 	}
 }
 
-func uploadLocalStubsAndTagVersion(stubRepoPath string, stubs map[string]string, version string) {
+func uploadLocalStubsAndTagVersion(
+	stubRepoPath string,
+	stubs map[string]string,
+	version string,
+	username string,
+	password string,
+) {
 	currentPath, err := os.Getwd()
 	if err != nil {
 		console.Fatalf(err.Error())
 	}
 
-	repo := repository.NewLocalRepo(currentPath, stubRepoPath)
+	repo := repository.NewLocalRepo(currentPath, stubRepoPath, username, password)
 	if repo == nil {
 		console.Fatalf("Make sure your current path is at the root of a git repo")
 	}

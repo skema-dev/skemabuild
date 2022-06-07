@@ -107,6 +107,12 @@ func (g *githubAuth) SaveTokenToFile() {
 func (g *githubAuth) GetLocalToken() string {
 	homePath := io.GetHomePath()
 	tokenFilepath := filepath.Join(homePath, "github/token")
-	data, _ := os.ReadFile(tokenFilepath)
+	data, err := os.ReadFile(tokenFilepath)
+	if err != nil {
+		console.Fatalf(
+			"%s\nLocal github token not found, please run `st auth -t github` to initialize",
+		)
+	}
+
 	return string(data)
 }

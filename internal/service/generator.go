@@ -3,11 +3,12 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"strings"
+	"text/template"
+
 	"github.com/skema-dev/skema-tool/internal/auth"
 	"github.com/skema-dev/skema-tool/internal/pkg/console"
 	"github.com/skema-dev/skema-tool/internal/pkg/repository"
-	"strings"
-	"text/template"
 )
 
 type Generator interface {
@@ -68,7 +69,10 @@ func (g *grpcGoGenerator) getTplContents(tpl string) map[string]string {
 	return tpls
 }
 
-func (g *grpcGoGenerator) parseFilename(tplFilepathName string, userParameters map[string]string) string {
+func (g *grpcGoGenerator) parseFilename(
+	tplFilepathName string,
+	userParameters map[string]string,
+) string {
 	placeHolderStart := strings.Index(tplFilepathName, "$")
 	placeHolderEnd := strings.Index(tplFilepathName, "#")
 	if placeHolderStart < 0 || placeHolderEnd <= placeHolderStart {
@@ -81,11 +85,20 @@ func (g *grpcGoGenerator) parseFilename(tplFilepathName string, userParameters m
 	if !ok {
 		console.Fatalf("missing filename placeholder %s", k)
 	}
-	filename := fmt.Sprintf("%s%s%s", tplFilepathName[:placeHolderStart], v, tplFilepathName[placeHolderEnd+1:len(tplFilepathName)])
+	filename := fmt.Sprintf(
+		"%s%s%s",
+		tplFilepathName[:placeHolderStart],
+		v,
+		tplFilepathName[placeHolderEnd+1:len(tplFilepathName)],
+	)
 	return filename
 }
 
-func (g *grpcGoGenerator) apply(tpls map[string]string, parameters *RpcParameters, userParameters map[string]string) map[string]string {
+func (g *grpcGoGenerator) apply(
+	tpls map[string]string,
+	parameters *RpcParameters,
+	userParameters map[string]string,
+) map[string]string {
 	result := make(map[string]string)
 	console.Info("generating grpc service code...")
 	for tplFilepathName, tplContent := range tpls {

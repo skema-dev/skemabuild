@@ -1,8 +1,14 @@
-# skema-tool
-dev tools for skema.  
-Generate stubs and service code automatically from a single protobuf file.  
-Get gRPC service code in one shot! 
-Support github and any other git repo host (e.g. gitlab, bitbucket, whatever)!!  
+# Skema-Tool
+Your One-Stop command line tool to generate grpc-go code from protobuf file AUTOMATICALLY.  
+And it's dev ready and production ready!  
+- taking care of all necessary protocol buffers/grpc/plugins/dependencies installation  
+- publish grpc stubs automatically  
+- Support github and any other git repo host (e.g. gitlab, bitbucket, whatever)!!  
+- Customizable online code templates  
+- Generate production level grpc service code automatically! Not dummy sample code
+- It's FAST! Generating ready-to-go code from protocol buffers has never been so fast!!
+  
+<img src="skematool.jpg" style="width: 720px;"/>
 
 ## Quick Start
 
@@ -113,7 +119,18 @@ st api create -i ./Hello3.proto -o ./temp --go_option "gitlab.com/likexx/test1/s
 # "stub" is the user specified path in the repo
 st api publish -s ./temp -u stub --version v1.0.2
 
-# verify the generated go package
-# make sure the repo on gitlab is public, so we don't need to mess around with go proxy setting.
-go get gitlab.com/likexx/test1/stub/org.test/grpc-go@v1.0.2
+# create grpc service from the raw protobuf file link
+# you may need to run `st auth -t github` in order to use the code template on github repo
+st service create -p https://gitlab.com/likexx/test1/-/raw/main/stub/org.test/grpc-go/Hello3.proto
+
+go mod tidy
+cd cmd
+cd hello3service
+go run .
+```
+
+### 7. Use Username and Password for Git Http Auth
+Some users might clone repo using https instead of ssh. No problem! Just specify your username and password when publishing protobuf stubs:  
+```
+st api publish -s ./temp -u stub --version v1.0.1 --username=<your git username> --password=<your password>
 ```

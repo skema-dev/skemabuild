@@ -33,7 +33,7 @@ func NewCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("type", "t", "github", "auth provider")
+	cmd.Flags().StringP("type", "t", "github", "auth provider: github")
 
 	return cmd
 }
