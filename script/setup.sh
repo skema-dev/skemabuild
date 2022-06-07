@@ -6,7 +6,7 @@ function add_env_sh() {
     then
         echo ""
     else
-        echo 'export SKEMA_HOME="${HOME}/.skema/bin"' >> $1
+        echo 'export SKEMA_HOME="${HOME}/.skema"' >> $1
         echo 'export PATH="${PATH}:${SKEMA_HOME}"' >> $1
     fi
 }

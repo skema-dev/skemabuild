@@ -65,9 +65,15 @@ func publishFromStubs(stubPath string, uploadUrl string, version string) {
 		console.Fatalf("Not able to load local stubs from %s. %s", stubPath, err.Error())
 	}
 
-	// attach original package name after given path in github repo
-	stubUploadUrl := fmt.Sprintf("%s/%s", uploadUrl, originalPackageName)
-	uploadGithubStubsAndTagVersion(stubUploadUrl, stubs, version)
+	switch getRepoTypeFromUrl(uploadUrl) {
+	case "github":
+		// attach original package name after given path in github repo
+		stubUploadUrl := fmt.Sprintf("%s/%s", uploadUrl, originalPackageName)
+		uploadGithubStubsAndTagVersion(stubUploadUrl, stubs, version)
+	default:
+		stubRepoPath := fmt.Sprintf("%s/%s", uploadUrl, originalPackageName)
+		uploadLocalStubsAndTagVersion(stubRepoPath, stubs, version)
+	}
 
 	// output the new version to be imported in go project
 	console.Info("new version published: go get %s@%s", goPackage, version)
@@ -78,19 +84,36 @@ func publishFromProto(protoPath string, stubTypes string, uploadUrl string, vers
 	if err != nil {
 		console.Fatalf(err.Error())
 	}
-	protoContent := string(data)
-	expectedPackageUri := api.GetExpectedGithubGoPackageUri(uploadUrl, protoContent)
-	stubs, err := generateStubsFromProto(protoPath, stubTypes, expectedPackageUri)
-	if err != nil {
-		console.Fatalf(err.Error())
+	switch getRepoTypeFromUrl(uploadUrl) {
+	case "github":
+		protoContent := string(data)
+		expectedPackageUri := api.GetExpectedGithubGoPackageUri(uploadUrl, protoContent)
+		stubs, err := generateStubsFromProto(protoPath, stubTypes, expectedPackageUri)
+		if err != nil {
+			console.Fatalf(err.Error())
+		}
+
+		// attach original package name after given path in github repo
+		stubUploadUrl := fmt.Sprintf("%s/%s", uploadUrl, api.GetPackageNameFromProto(protoContent))
+		uploadGithubStubsAndTagVersion(stubUploadUrl, stubs, version)
+
+		// output the new version to be imported in go project
+		console.Info("new version published: go get %s@%s", expectedPackageUri, version)
+	default:
+		protoContent := string(data)
+		expectedPackageUri := api.GetOptionPackageNameFromProto(protoContent, "go_package")
+		stubs, err := generateStubsFromProto(protoPath, stubTypes, expectedPackageUri)
+		if err != nil {
+			console.Fatalf(err.Error())
+		}
+
+		// attach original package name after given path in github repo
+		stubRepoPath := fmt.Sprintf("%s/%s", uploadUrl, api.GetPackageNameFromProto(protoContent))
+		uploadLocalStubsAndTagVersion(stubRepoPath, stubs, version)
+
+		// output the new version to be imported in go project
+		console.Info("new version published: go get %s@%s", expectedPackageUri, version)
 	}
-
-	// attach original package name after given path in github repo
-	stubUploadUrl := fmt.Sprintf("%s/%s", uploadUrl, api.GetPackageNameFromProto(protoContent))
-	uploadGithubStubsAndTagVersion(stubUploadUrl, stubs, version)
-
-	// output the new version to be imported in go project
-	console.Info("new version published: go get %s@%s", expectedPackageUri, version)
 }
 
 func loadUploadingStubs(
@@ -122,16 +145,19 @@ func loadUploadingStubs(
 		if goPackage == "" {
 			if strings.HasPrefix(relativePath, "grpc-go") &&
 				strings.HasSuffix(relativePath, ".proto") {
-				// make sure go package definition is compatible with upload url
+				// make sure go package definition is not empty
 				content := stubs[relativePath]
 				goPackage = api.GetOptionGoPackageNameFromProto(content)
-				expectedPackage := api.GetExpectedGithubGoPackageUri(uploadUrl, content)
-				if goPackage != expectedPackage {
-					console.Fatalf(
-						"Incorrect package definition\nCurrent go_package=\"%s\"\nExpected go_package=\"%s\"\n",
-						goPackage,
-						expectedPackage,
-					)
+				if getRepoTypeFromUrl(uploadUrl) == "github" {
+					// validate go_package only for github upload
+					expectedPackage := api.GetExpectedGithubGoPackageUri(uploadUrl, content)
+					if goPackage != expectedPackage {
+						console.Fatalf(
+							"Incorrect package definition\nCurrent go_package=\"%s\"\nExpected go_package=\"%s\"\n",
+							goPackage,
+							expectedPackage,
+						)
+					}
 				}
 				goModContent := api.GenerateGoMod(goPackage)
 				stubs["grpc-go/go.mod"] = goModContent
@@ -143,6 +169,14 @@ func loadUploadingStubs(
 	})
 
 	return stubs, goPackage, originalPackageName, err
+}
+
+func getRepoTypeFromUrl(uploadUrl string) string {
+	if strings.HasPrefix(uploadUrl, "http://github.com") || strings.HasPrefix(uploadUrl, "https://github.com") {
+		return "github"
+	}
+
+	return "local"
 }
 
 func uploadGithubStubsAndTagVersion(stubUploadUrl string, stubs map[string]string, version string) {
@@ -163,6 +197,31 @@ func uploadGithubStubsAndTagVersion(stubUploadUrl string, stubs map[string]strin
 	githubVersionTag := fmt.Sprintf("%s/grpc-go/%s", repoPath, version)
 	console.Info("update version to %s", githubVersionTag)
 	if err := repo.AddVersion(repoName, githubVersionTag, commitID); err != nil {
+		console.Fatalf("failed to create new version: %s", err.Error())
+	}
+}
+
+func uploadLocalStubsAndTagVersion(stubRepoPath string, stubs map[string]string, version string) {
+	currentPath, err := os.Getwd()
+	if err != nil {
+		console.Fatalf(err.Error())
+	}
+
+	repo := repository.NewLocalRepo(currentPath, stubRepoPath)
+	if repo == nil {
+		console.Fatalf("Make sure your current path is at the root of a git repo")
+	}
+
+	console.Info("uploading to %s", stubRepoPath)
+	_, err = repo.UploadToRepo(stubs, stubRepoPath, false)
+	if err != nil {
+		console.Fatalf(err.Error())
+	}
+
+	// add tag for the published version
+	githubVersionTag := fmt.Sprintf("%s/grpc-go/%s", stubRepoPath, version)
+	console.Info("update version to %s", githubVersionTag)
+	if err := repo.AddVersion("", githubVersionTag, ""); err != nil {
 		console.Fatalf("failed to create new version: %s", err.Error())
 	}
 }

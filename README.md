@@ -1,7 +1,8 @@
 # skema-tool
 dev tools for skema.  
 Generate stubs and service code automatically from a single protobuf file.  
-Get gRPC service code in one shot!  
+Get gRPC service code in one shot! 
+Support github and any other git repo host (e.g. gitlab, bitbucket, whatever)!!  
 
 ## Quick Start
 
@@ -77,3 +78,24 @@ You'll see the launching information of grpc service and the http endpoint gatew
 2022-06-07T00:48:32.461+0800	INFO	logging/logging.go:96	Serving gRPC start...
 ```
 To further understand how the code is designed, Please checkout our [Skema-Go Framework](https://github.com/skema-dev/skema-go)
+
+6. Support for private Git Server  
+Skema Tool is also capable of publishing stubs to your private git server. Comparing with publishing on github, you'll have to do three things differently:  
+- You need to have ~/.ssh/id_rsa file and authenticated in your git server (e.g. gitlab or others)
+- Clone the git repo on your local path  
+- Specify the go_package option explicitly when creating stubs  
+That's it. The whole workflow is the same as previously:  
+```
+# init protobuf file
+st api init --package=org.test --service=Hello2
+
+# generate stubs and output to ./temp, using user specified go_option
+st api create -i ./Hello2.proto -o ./temp --go_option "github.com/likezhang-public/skematest/stub/org.test/grpc-go"
+
+# publish stubs from ./temp to the repo (assuming the command is executed at the repository root).
+# "stub" is the user specified path in the repo
+st api publish -s ./temp -u stub --version v1.0.1
+
+# verify the generated go package
+go get github.com/likezhang-public/skematest/stub/org.test/grpc-go@v1.0.1
+```
