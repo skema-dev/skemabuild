@@ -28,6 +28,11 @@ func newInitCmd() *cobra.Command {
 			if path == "" {
 				path = "./"
 			}
+
+			if !strings.Contains(userPackage, ".") && !strings.Contains(userPackage, "/") {
+				console.Fatalf("Invalide package name. package must contains . or /, not a single word")
+			}
+
 			var userOptions []string
 			optionValue, err := c.Flags().GetString("option")
 			if err == nil {

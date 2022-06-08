@@ -31,27 +31,27 @@ You'll be prompted to open github device auth URL and input the token. Then just
 Now run and test(The following example is using my own sample repo. Change with your own account and repo)
 ```shell
 # create an initial protocol buffers file
-skbuild api init --package=pack1 --service=hello
+skbuild api init --package=com.pack1 --service=hello
 
 # create stubs for grpc-go and openapi, using protobuf file Hello1.proto, and output to ./stub-test
-skbuild api create --go_option github.com/likezhang-public/newst/test2/com.test/grpc-go --input ./hello.proto -o ./stub-test
+skbuild api create --go_option github.com/likezhang-public/newst/test001/com.pack1/grpc-go --input ./hello.proto -o ./stub-test
 
 # after stubs are created, upload to github and set the version tag
 # the "url" argument is for verifying the go_package option defined above
-skbuild api publish --stub=./stub-test --url  https://github.com/likezhang-public/newst/test2 --version=v0.0.2
+skbuild api publish --stub=./stub-test --url  https://github.com/likezhang-public/newst/test001 --version=v0.0.1
 
 # verify the package is downloadable
-skbuild get github.com/likezhang-public/newst/test2/com.test/grpc-go@v0.0.2
+skbuild get github.com/likezhang-public/newst/test001/com.pack1/grpc-go@v0.0.1
 ```
   
 You can also skip creating local stubs and publish to github directly:  
 ```shell
-skbuild api init --package=pack1 --service=hello
+skbuild api init --package=com.pack1 --service=hello
 
 # here we combine the two steps (create and publish) into a single process to simplify the workflow
 skbuild api publish --proto=./hello.proto --url  https://github.com/likezhang-public/newst/test2 --version=v0.0.2
 
-go get github.com/likezhang-public/newst/test2/com.test/grpc-go@v0.0.2
+go get github.com/likezhang-public/newst/test2/com.pack1/grpc-go@v0.0.2
 ```
   
 How about publishing to non-github repository? How about gitlab/bitbucket or private git hosting?  
@@ -62,7 +62,7 @@ Check out #6 for details. It's almost the same process :)
 Now it's the final step: generate runnable gRPC service code automatically!  
 Just use the following example to specify the protobuf file you published online  
 ```shell
-skbuild service create --proto https://github.com/likezhang-public/newst/blob/main/test2/com.test/grpc-go/Hello1.proto
+skbuild service create --proto https://github.com/likezhang-public/newst/blob/main/test2/com.pack1/grpc-go/Hello.proto
 ```
 Then we'll have the following code layout in current path. (you can specify output path by using --output)
 .
@@ -82,7 +82,7 @@ Then we'll have the following code layout in current path. (you can specify outp
 To test it out, run `go mod tidy` first to install dependencies, then go to `cmd/hello1service` and `go run .`  
 ```shell
 go mod tidy
-cd cmd/hello1service
+cd cmd/helloservice
 go run .
 ```
 You'll see the launching information of grpc service and the http endpoint gateway:  

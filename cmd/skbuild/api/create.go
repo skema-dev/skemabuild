@@ -35,9 +35,8 @@ func newCreateCmd() *cobra.Command {
 			//TODO: download remote file if input starts with http[s]://
 
 			stubs, err := generateStubsFromProto(input, stubTypes, goOption)
-			if err != nil {
-				console.Fatalf(err.Error())
-			}
+			console.FatalIfError(err)
+
 			for path, stub := range stubs {
 				stubFilepath := filepath.Join(output, path)
 				if err = io.SaveToFile(stubFilepath, []byte(stub)); err != nil {
@@ -66,9 +65,8 @@ func generateStubsFromProto(
 ) (stubs map[string]string, err error) {
 	stubs = make(map[string]string)
 	data, err := os.ReadFile(protoPath)
-	if err != nil {
-		console.Fatalf(err.Error())
-	}
+	console.FatalIfError(err)
+
 	content := string(data)
 	stubTypeArr := strings.Split(stubTypes, ",")
 
@@ -85,17 +83,14 @@ func generateStubsFromProto(
 			console.Errorf("unsupported stub type: %s", stubType)
 			continue
 		}
-
 		contents, err := creator.Generate(content)
-		if err != nil {
-			console.Fatalf(err.Error())
-		}
+		console.FatalIfError(err)
 
 		for k, v := range contents {
 			stubFilePath := filepath.Join(stubType, k)
 			stubs[stubFilePath] = v
 		}
 	}
-
+	logging.Debugf("%v", stubs)
 	return stubs, nil
 }
