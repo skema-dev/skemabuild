@@ -1,6 +1,8 @@
 package api
 
 import (
+	"github.com/skema-dev/skemabuild/internal/pkg/http"
+	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,9 +34,8 @@ func newCreateCmd() *cobra.Command {
 				logging.Init("debug", "console")
 			}
 
-			//TODO: download remote file if input starts with http[s]://
-
-			stubs, err := generateStubsFromProto(input, stubTypes, goOption)
+			content := getContentFromInputPath(input)
+			stubs, err := generateStubsFromProto(content, stubTypes, goOption)
 			console.FatalIfError(err)
 
 			for path, stub := range stubs {
@@ -59,15 +60,11 @@ func newCreateCmd() *cobra.Command {
 }
 
 func generateStubsFromProto(
-	protoPath string,
+	content string,
 	stubTypes string,
 	goOption string,
 ) (stubs map[string]string, err error) {
 	stubs = make(map[string]string)
-	data, err := os.ReadFile(protoPath)
-	console.FatalIfError(err)
-
-	content := string(data)
 	stubTypeArr := strings.Split(stubTypes, ",")
 
 	for _, stubType := range stubTypeArr {
@@ -93,4 +90,18 @@ func generateStubsFromProto(
 	}
 	logging.Debugf("%v", stubs)
 	return stubs, nil
+}
+
+func getContentFromInputPath(input string) string {
+	var content string
+	if pattern.IsHttpUrl(input) {
+		content = http.GetTextContent(input)
+	} else if pattern.IsGithubUrl(input) {
+		console.Fatalf("please use the raw content link for github proto file")
+	} else {
+		data, err := os.ReadFile(input)
+		console.FatalIfError(err, "failed to read from "+input)
+		content = string(data)
+	}
+	return content
 }

@@ -53,7 +53,8 @@ func newPublishCmd() *cobra.Command {
 			if stub != "" {
 				publishFromStubs(stub, uploadUrl, version, username, password)
 			} else if proto != "" {
-				publishFromProto(proto, stubTypes, uploadUrl, version, username, password)
+				protoContent := getContentFromInputPath(proto)
+				publishFromProto(protoContent, stubTypes, uploadUrl, version, username, password)
 			}
 		},
 	}
@@ -99,22 +100,17 @@ func publishFromStubs(
 }
 
 func publishFromProto(
-	protoPath string,
+	protoContent string,
 	stubTypes string,
 	uploadUrl string,
 	version string,
 	username string,
 	password string,
 ) {
-	data, err := os.ReadFile(protoPath)
-	if err != nil {
-		console.Fatalf(err.Error())
-	}
 	switch getRepoTypeFromUrl(uploadUrl) {
 	case "github":
-		protoContent := string(data)
 		expectedPackageUri := api.GetExpectedGithubGoPackageUri(uploadUrl, protoContent)
-		stubs, err := generateStubsFromProto(protoPath, stubTypes, expectedPackageUri)
+		stubs, err := generateStubsFromProto(protoContent, stubTypes, expectedPackageUri)
 		if err != nil {
 			console.Fatalf(err.Error())
 		}
@@ -126,9 +122,8 @@ func publishFromProto(
 		// output the new version to be imported in go project
 		console.Info("new version published: go get %s@%s", expectedPackageUri, version)
 	default:
-		protoContent := string(data)
 		expectedPackageUri := api.GetOptionPackageNameFromProto(protoContent, "go_package")
-		stubs, err := generateStubsFromProto(protoPath, stubTypes, expectedPackageUri)
+		stubs, err := generateStubsFromProto(protoContent, stubTypes, expectedPackageUri)
 		if err != nil {
 			console.Fatalf(err.Error())
 		}

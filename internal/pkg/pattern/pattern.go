@@ -2,6 +2,7 @@ package pattern
 
 import (
 	"regexp"
+	"strings"
 )
 
 func GetNamedStringFromText(s string, regexpPattern string, name string) string {
@@ -49,4 +50,14 @@ func GetNamedMapFromText(s string, regexpPattern string, names []string) map[str
 	}
 
 	return result
+}
+
+func IsHttpUrl(s string) bool {
+	ls := strings.ToLower(s)
+	return strings.HasPrefix(ls, "https://") || strings.HasPrefix(ls, "http://")
+}
+
+func IsGithubUrl(s string) bool {
+	ls := strings.ToLower(s)
+	return strings.HasPrefix(ls, "https://github.com") || strings.HasPrefix(ls, "http://github.com")
 }

@@ -1,18 +1,17 @@
 package service
 
 import (
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-
-	"github.com/go-resty/resty/v2"
 	"github.com/skema-dev/skemabuild/internal/auth"
 	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/http"
 	"github.com/skema-dev/skemabuild/internal/pkg/io"
+	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
 	"github.com/skema-dev/skemabuild/internal/pkg/repository"
 	"github.com/skema-dev/skemabuild/internal/service"
 	"github.com/spf13/cobra"
+	"os"
+	"path/filepath"
+	"strconv"
 )
 
 const (
@@ -41,7 +40,7 @@ func newCreateCmd() *cobra.Command {
 			userParameters := map[string]string{}
 
 			var rpcParameters *service.RpcParameters
-			if strings.HasPrefix(protoUrl, "https://github.com/") {
+			if pattern.IsGithubUrl(protoUrl) {
 				// use github client to get proto file
 				authProvider := auth.NewGithubAuthProvider()
 				repo := repository.NewGithubRepo(authProvider.GetLocalToken())
@@ -62,13 +61,10 @@ func newCreateCmd() *cobra.Command {
 					goVersion,
 					serviceName,
 				)
-			} else if strings.HasPrefix(protoUrl, "http://") || strings.HasPrefix(protoUrl, "https://") {
+			} else if pattern.IsHttpUrl(protoUrl) {
 				// get proto by regular http
 				console.Info("get remote proto: %s", protoUrl)
-				client := resty.New()
-				resp, _ := client.R().
-					Get(protoUrl)
-				content := string(resp.Body())
+				content := http.GetTextContent(protoUrl)
 				rpcParameters = service.GetRpcParameters(content, goModule, goVersion, serviceName)
 			} else {
 				// read from local path

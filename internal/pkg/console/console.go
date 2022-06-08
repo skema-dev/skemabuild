@@ -34,9 +34,13 @@ func ExecCommandWithPath(path string, name string, arg ...string) error {
 	return executeCmd(cmd)
 }
 
-func FatalIfError(err error) {
+func FatalIfError(err error, msg ...string) {
 	if err != nil {
-		Fatalf(err.Error())
+		if len(msg) == 0 {
+			Fatalf(err.Error())
+		}
+
+		Fatalf("%s\n%s\n", msg, err.Error())
 	}
 }
 
