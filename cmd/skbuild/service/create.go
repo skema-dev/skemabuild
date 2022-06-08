@@ -1,6 +1,7 @@
 package service
 
 import (
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -61,13 +62,19 @@ func newCreateCmd() *cobra.Command {
 					goVersion,
 					serviceName,
 				)
-			} else {
+			} else if strings.HasPrefix(protoUrl, "http://") || strings.HasPrefix(protoUrl, "https://") {
 				// get proto by regular http
 				console.Info("get remote proto: %s", protoUrl)
 				client := resty.New()
 				resp, _ := client.R().
 					Get(protoUrl)
 				content := string(resp.Body())
+				rpcParameters = service.GetRpcParameters(content, goModule, goVersion, serviceName)
+			} else {
+				// read from local path
+				data, err := os.ReadFile(protoUrl)
+				console.FatalIfError(err)
+				content := string(data)
 				rpcParameters = service.GetRpcParameters(content, goModule, goVersion, serviceName)
 			}
 			rpcParameters.HttpEnabled = httpEnabled
