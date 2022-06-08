@@ -34,7 +34,7 @@ Now run and test(The following example is using my own sample repo. Change with 
 skbuild api init --package=pack1 --service=hello
 
 # create stubs for grpc-go and openapi, using protobuf file Hello1.proto, and output to ./stub-test
-skbuild api create --go_option github.com/likezhang-public/newst/test2/com.test/grpc-go --input ./Hello1.proto -o ./stub-test
+skbuild api create --go_option github.com/likezhang-public/newst/test2/com.test/grpc-go --input ./hello.proto -o ./stub-test
 
 # after stubs are created, upload to github and set the version tag
 # the "url" argument is for verifying the go_package option defined above
