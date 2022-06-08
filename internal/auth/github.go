@@ -110,7 +110,7 @@ func (g *githubAuth) GetLocalToken() string {
 	data, err := os.ReadFile(tokenFilepath)
 	if err != nil {
 		console.Fatalf(
-			"%s\nLocal github token not found, please run `st auth -t github` to initialize",
+			"%s\nLocal github token not found, please run `skbuild auth` to setup",
 		)
 	}
 
