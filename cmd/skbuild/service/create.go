@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/skema-dev/skema-tool/internal/auth"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
-	"github.com/skema-dev/skema-tool/internal/pkg/repository"
-	"github.com/skema-dev/skema-tool/internal/service"
+	"github.com/skema-dev/skemabuild/internal/auth"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/io"
+	"github.com/skema-dev/skemabuild/internal/pkg/repository"
+	"github.com/skema-dev/skemabuild/internal/service"
 	"github.com/spf13/cobra"
 )
 

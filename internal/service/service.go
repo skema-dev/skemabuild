@@ -8,9 +8,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
 	"github.com/jhump/protoreflect/desc/protoparse"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
-	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/io"
+	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 

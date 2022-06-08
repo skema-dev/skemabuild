@@ -6,9 +6,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/skema-dev/skema-tool/internal/auth"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/repository"
+	"github.com/skema-dev/skemabuild/internal/auth"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/repository"
 )
 
 type Generator interface {

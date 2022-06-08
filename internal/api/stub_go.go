@@ -9,9 +9,9 @@ import (
 	"text/template"
 
 	"github.com/google/uuid"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
-	"github.com/skema-dev/skema-tool/internal/pkg/repository"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/io"
+	"github.com/skema-dev/skemabuild/internal/pkg/repository"
 )
 
 //go:embed tpl/go_mod.tpl

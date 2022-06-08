@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/skema-dev/skema-go/logging"
-	"github.com/skema-dev/skema-tool/internal/api"
-	"github.com/skema-dev/skema-tool/internal/auth"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/repository"
+	"github.com/skema-dev/skemabuild/internal/api"
+	"github.com/skema-dev/skemabuild/internal/auth"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/repository"
 	"github.com/spf13/cobra"
 )
 

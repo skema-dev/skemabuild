@@ -11,8 +11,8 @@ import (
 	"github.com/google/go-github/v44/github"
 	"github.com/google/uuid"
 	"github.com/skema-dev/skema-go/logging"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
 	"golang.org/x/oauth2"
 )
 

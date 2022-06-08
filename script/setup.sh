@@ -61,6 +61,6 @@ rm -rf ~/.skema
 install_grpc_protos
 set_environments
 
-go install github.com/skema-dev/skema-tool/cmd/st
+go install github.com/skema-dev/skemabuild/cmd/skbuild
 
 exit 0

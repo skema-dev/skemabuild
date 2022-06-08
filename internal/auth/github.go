@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/io"
 )
 
 var (

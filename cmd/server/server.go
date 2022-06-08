@@ -1,3 +1,3 @@
-package stserver
+package server
 
 // a simple api service

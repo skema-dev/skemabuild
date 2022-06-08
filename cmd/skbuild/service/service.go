@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
 
 	"github.com/spf13/cobra"
 )

@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/skema-dev/skema-go/logging"
-	"github.com/skema-dev/skema-tool/internal/pkg/console"
-	"github.com/skema-dev/skema-tool/internal/pkg/io"
-	"github.com/skema-dev/skema-tool/internal/pkg/pattern"
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/io"
+	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
 )
 
 const (
