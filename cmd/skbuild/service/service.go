@@ -8,7 +8,7 @@ import (
 
 const (
 	serviceDescription     = "Generate Service Code"
-	serviceLongDescription = "sd service create --type=grpc-go --tpl=skema-grpc --api=github.com/xxxxx/test.pb"
+	serviceLongDescription = "skbuild service create --type=grpc-go --tpl=skema-grpc --api=github.com/xxxxx/test.pb"
 )
 
 func NewCmd() *cobra.Command {

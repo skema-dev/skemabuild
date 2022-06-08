@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/skema-dev/skema-go/logging"
 	"github.com/skema-dev/skemabuild/cmd/skbuild/api"
 	"github.com/skema-dev/skemabuild/cmd/skbuild/auth"
@@ -11,7 +12,8 @@ import (
 )
 
 const (
-	description = "toolkit for quick protobuf based service code generating"
+	description = "SkemaBuild(skbuild): Build Protocol Buffers Based gRPC Service Code"
+	version     = "preview"
 )
 
 func main() {
@@ -22,9 +24,9 @@ func main() {
 func newCmdRoot() *cobra.Command {
 	logging.Init("info", "console")
 	var cmd = &cobra.Command{
-		Use:   "sd",
-		Short: description,
-		Long:  description,
+		Use:   "skbuild",
+		Short: fmt.Sprintf("SkemaBuild(skbuild) version(%s)", version),
+		Long:  fmt.Sprintf("\n%s\nversion: %s", description, version),
 	}
 
 	cmd.AddCommand(auth.NewCmd())

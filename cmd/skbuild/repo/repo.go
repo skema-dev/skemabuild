@@ -6,7 +6,7 @@ import (
 
 const (
 	shortDescription = "display repository information"
-	longDescription  = "sd repo github list"
+	longDescription  = "skbuild repo github list"
 )
 
 func NewCmd() *cobra.Command {

@@ -9,7 +9,7 @@ import (
 
 const (
 	shortGithubDescription = "manage github repo"
-	longGithubDescription  = "sd repo github list"
+	longGithubDescription  = "skbuild repo github list"
 )
 
 func newGithubCmd() *cobra.Command {

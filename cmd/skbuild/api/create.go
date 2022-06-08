@@ -14,7 +14,7 @@ import (
 
 const (
 	createDescription     = "Create API Stubs"
-	createLongDescription = "st api create --go_option github.com/com/test --input ./Hello1.proto -o ./stub-test"
+	createLongDescription = "skbuild api create --go_option github.com/com/test --input ./Hello1.proto -o ./stub-test"
 )
 
 func newCreateCmd() *cobra.Command {

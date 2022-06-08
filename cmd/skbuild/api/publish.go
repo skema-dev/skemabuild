@@ -16,8 +16,17 @@ import (
 )
 
 const (
-	publishDescription     = "Publish Proto&Stub to Github"
-	publishLongDescription = "st api publish --stub=./stub-test --url https://github.com/likezhang-public/newst/tes1 --version=v0.0.1"
+	publishDescription     = "Publish Proto&Stub to Git"
+	publishLongDescription = `
+1. publish to github
+skbuild api publish --stub=./stub-test --url https://github.com/likezhang-public/newst/tes1 --version=v0.0.1
+2. publish to relative path in current repo
+
+skbuild api publish --stub=./stub-test --url <path_in_repo> --version=v0.0.1
+
+3. publish using http auth
+skbuild api publish --stub=./stub-test --url <path_in_repo> --version=v0.0.1 --username=<username> --password=<password>
+`
 )
 
 func newPublishCmd() *cobra.Command {

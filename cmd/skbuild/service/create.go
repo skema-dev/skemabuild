@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	createDescription     = "Create service code from api definition"
-	createLongDescription = "sd service create --type=<framework> --tpl=<template> --proto=<protobuf_uri>"
+	createDescription     = "Create service code from protocol buffers definition"
+	createLongDescription = "skbuild service create --proto=<protobuf_uri>"
 )
 
 func newCreateCmd() *cobra.Command {

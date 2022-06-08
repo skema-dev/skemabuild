@@ -13,7 +13,7 @@ import (
 
 const (
 	initDescription     = "Init API Protocol Buffers Definition"
-	initLongDescription = "sd api init --package=<package_name> --service=<service_name> --path=<output_path>"
+	initLongDescription = "skbuild api init --package=<package_name> --service=<service_name> --path=<output_path>"
 )
 
 func newInitCmd() *cobra.Command {

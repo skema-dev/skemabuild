@@ -8,7 +8,7 @@ import (
 
 const (
 	authDescription     = "Authentication from git provider"
-	authLongDescription = "sd auth --type=<provider_type>"
+	authLongDescription = "skbuild auth"
 )
 
 func NewCmd() *cobra.Command {
