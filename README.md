@@ -16,7 +16,7 @@ And it's dev ready and production ready!
 First, make sure you have golang installed.  
 Then setup necessary protocol buffers related tools:  
 ```shell
-curl -L https://raw.githubusercontent.com/skema-dev/skemabuild/main/script/setup.sh | bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/skema-dev/skemabuild/main/script/setup.sh)"
 ```
 <hr/>
 
