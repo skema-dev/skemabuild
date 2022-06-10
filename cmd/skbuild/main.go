@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/skema-dev/skema-go/logging"
 	"github.com/skema-dev/skemabuild/cmd/skbuild/api"
 	"github.com/skema-dev/skemabuild/cmd/skbuild/auth"
+	"github.com/skema-dev/skemabuild/cmd/skbuild/dev"
 	"github.com/skema-dev/skemabuild/cmd/skbuild/repo"
 	"github.com/skema-dev/skemabuild/cmd/skbuild/service"
 
@@ -33,6 +35,7 @@ func newCmdRoot() *cobra.Command {
 	cmd.AddCommand(api.NewCmd())
 	cmd.AddCommand(service.NewCmd())
 	cmd.AddCommand(repo.NewCmd())
+	cmd.AddCommand(dev.NewCmd())
 
 	return cmd
 }

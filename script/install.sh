@@ -1,5 +1,9 @@
 #!/bin/bash
 
+function command_exists() {
+	command -v "$@" > /dev/null 2>&1
+}
+
 function add_env_sh() {
     result=$(cat $1 | grep "SKEMA_HOME")
     if [[ "$result" != "" ]]
@@ -58,8 +62,78 @@ function install_grpc_protos() {
     go install github.com/envoyproxy/protoc-gen-validate@v0.6.7
 }
 
+function install_kind() {
+    echo "try installing kind for local kubernetes cluster"
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.14.0/kind-linux-amd64
+        chmod +x ./kind
+        mv ./kind /usr/local/bin/kind
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install kind
+    else
+        echo "Install Kind Using go install"
+        go install sigs.k8s.io/kind@v0.14.0
+    fi    
+}
+
+function install_docker() {
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        curl -fsSL https://get.docker.com/ | bash
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install --cask docker
+    else
+        echo "Please install docker manually"
+    fi
+}
+
+function install_docker_compose() {
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        curl -L "https://github.com/docker/compose/releases/download/v2.6.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install docker-compose
+    else
+        echo "Please install docker-compose manually"
+    fi
+}
+
+function install_docker_tools() {
+    echo "Install docker and docker-compose"
+    docker_versioninfo=""
+    docker_versioninfo=$(docker --version | head -n 1)
+    if [ -z "$docker_versioninfo" ]; then
+        echo docker not exists;
+        install_docker
+    else
+        echo docker already exists, version is: $docker_versioninfo ;
+    fi
+
+    if command_exists docker-compose; then
+        echo docker-compose already exists;
+    else
+        echo docker-compose not exists;
+        install_docker_compose
+    fi
+
+
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.14.0/kind-linux-amd64
+        chmod +x ./kind
+        mv ./kind /usr/local/bin/kind
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install kind
+    else
+        echo "Install Kind Using go install"
+        go install sigs.k8s.io/kind@v0.14.0
+    fi    
+}
+
+
+
 rm -rf ~/.skema
 install_grpc_protos
+install_docker_tools
+install kind
 set_environments
 
 cmd="go install github.com/skema-dev/skemabuild/cmd/skbuild@latest"

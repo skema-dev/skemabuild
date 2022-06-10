@@ -6,6 +6,7 @@ And it's dev ready and production ready!
 - Support github and any other git repo host (e.g. gitlab, bitbucket, whatever)!!  
 - Customizable online code templates  
 - Generate production level grpc service code automatically! Not dummy sample code
+- Automatic Dockerfile/Docker-Compose/Kubernetes Deployment Setup!! No more hassle figuring out port-forwaring/NodePort/Ingress/etc. for just local dev debugging!  
 - It's FAST! Generating ready-to-go code from protocol buffers has never been so fast!!
   
 <img src="intro.jpg" style="width: 720px;"/>
@@ -133,4 +134,32 @@ go run .
 Some users might clone repo using https instead of ssh. No problem! Just specify your username and password when publishing protobuf stubs:  
 ```
 skbuild api publish -s ./temp -u stub --version v1.0.1 --username=<your git username> --password=<your password>
+```
+
+### 8. Cloud Native Local Dev Environment!!  
+After the code is generated (using the standard template), you'll have a "env" folder, which contains script for kubernetes cluster setup (via kind), and Dockerfile/docker-compose/k8s deploy config/deploy scripts/etc.  
+Yes, we generate everything you need to pack your code into docker image, and play around with either docker-compose or local kubernetes cluster (the install script will add Kind on your machine).  
+Not just generating the scripts/configurations, we also simplified and standardlized the cluster/service setup/deployment in our skbuild tool. You can simply run the following commands:  
+```
+# create a kind cluster
+# save the output token for dashboard access
+skbuild dev cluster create
+
+# build docker image for the service
+skbuild dev service imagebuild -n <your servicename>
+
+# deploy the service on the cluster
+skbuild dev service create -n hello3service
+
+# test the service
+curl http://localhost:30002/api/healthcheck
+
+# you can check the k8s dashboard at:
+# http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
+
+# delete the service on cluster
+skbuild dev service delete -n hello3service
+
+# delete the cluster
+skbuild dev cluster delete
 ```

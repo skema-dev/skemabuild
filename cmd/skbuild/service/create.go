@@ -1,6 +1,11 @@
 package service
 
 import (
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+
 	"github.com/skema-dev/skemabuild/internal/auth"
 	"github.com/skema-dev/skemabuild/internal/pkg/console"
 	"github.com/skema-dev/skemabuild/internal/pkg/http"
@@ -9,9 +14,6 @@ import (
 	"github.com/skema-dev/skemabuild/internal/pkg/repository"
 	"github.com/skema-dev/skemabuild/internal/service"
 	"github.com/spf13/cobra"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 const (
@@ -25,19 +27,29 @@ func newCreateCmd() *cobra.Command {
 		Short: createDescription,
 		Long:  createLongDescription,
 		Run: func(c *cobra.Command, args []string) {
-			protoUrl, err := c.Flags().GetString("proto")
-			if err != nil {
-				console.Fatalf("invalid protobuf definition")
-			}
-			goModule, _ := c.Flags().GetString("module")
+			protoUrl := c.Flag("proto").Value.String()
+			goModule := c.Flag("module").Value.String()
 			goVersion, _ := c.Flags().GetString("goversion")
 			serviceName, _ := c.Flags().GetString("service")
 			output, _ := c.Flags().GetString("output")
 			tpl, _ := c.Flags().GetString("tpl")
 			s, _ := c.Flags().GetString("http")
 			httpEnabled, _ := strconv.ParseBool(s)
+			userParams, _ := c.Flags().GetString("parameters")
 
 			userParameters := map[string]string{}
+			if userParams != "" {
+				ss := strings.Split(userParams, ",")
+				for _, s := range ss {
+					kv := strings.Split(s, ":")
+					if len(kv) != 2 {
+						console.Fatalf("Invalid parameter: %s", s)
+					}
+					k := kv[0]
+					v := kv[1]
+					userParameters[k] = v
+				}
+			}
 
 			var rpcParameters *service.RpcParameters
 			if pattern.IsGithubUrl(protoUrl) {
@@ -93,6 +105,7 @@ func newCreateCmd() *cobra.Command {
 	cmd.Flags().StringP("tpl", "t", "standard", "template name or url")
 	cmd.Flags().String("http", "true", "enable http or not")
 	cmd.Flags().StringP("output", "o", "", "output path")
+	cmd.Flags().String("parameter", "", "user defined tpl parameters: key1:value1,key2:value2...")
 	cmd.MarkFlagRequired("proto")
 
 	return cmd

@@ -1,9 +1,11 @@
 package console
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -28,7 +30,7 @@ func ExecCommand(name string, arg ...string) error {
 	return executeCmd(cmd)
 }
 
-func ExecCommandWithPath(path string, name string, arg ...string) error {
+func ExecCommandInPath(path string, name string, arg ...string) error {
 	cmd := exec.Command(name, arg...)
 	cmd.Dir = path
 	return executeCmd(cmd)
@@ -44,24 +46,39 @@ func FatalIfError(err error, msg ...string) {
 	}
 }
 
+// use solution from https://blog.kowalczyk.info/article/wOYk/advanced-command-execution-in-go-with-osexec.html
 func executeCmd(cmd *exec.Cmd) error {
-	stderr, _ := cmd.StderrPipe()
-	stdout, _ := cmd.StdoutPipe()
-	cmd.Start()
-	go func() {
-		scanner := bufio.NewScanner(stderr)
-		scanner.Split(bufio.ScanLines)
-		for scanner.Scan() {
-			Errorf(scanner.Text())
-		}
-	}()
-	go func() {
-		scanner := bufio.NewScanner(stdout)
-		scanner.Split(bufio.ScanLines)
-		for scanner.Scan() {
-			Infof(scanner.Text())
-		}
-	}()
-	err := cmd.Wait()
+	Info(cmd.String())
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = io.MultiWriter(os.Stdout, &stdoutBuf)
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
+
+	// stderr, _ := cmd.StderrPipe()
+	// stdout, _ := cmd.StdoutPipe()
+	// cmd.Start()
+
+	// go func() {
+	// 	scanner := bufio.NewScanner(stderr)
+	// 	scanner.Split(bufio.ScanLines)
+	// 	for scanner.Scan() {
+	// 		Errorf(scanner.Text())
+	// 	}
+	// }()
+
+	// go func() {
+	// 	scanner := bufio.NewScanner(stdout)
+	// 	scanner.Split(bufio.ScanLines)
+	// 	for scanner.Scan() {
+	// 		Infof(scanner.Text())
+	// 	}
+	// }()
+
+	// err := cmd.Wait()
+
+	// outputBytes, _ := cmd.CombinedOutput()
+	// Info(string(outputBytes))
+
+	err := cmd.Run()
 	return err
 }

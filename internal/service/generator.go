@@ -3,11 +3,16 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
+	"github.com/skema-dev/skema-go/logging"
 	"github.com/skema-dev/skemabuild/internal/auth"
 	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
 	"github.com/skema-dev/skemabuild/internal/pkg/repository"
 )
 
@@ -32,21 +37,37 @@ func (g *grpcGoGenerator) CreateCodeContent(
 	rpcParameters *RpcParameters,
 	userParameters map[string]string,
 ) map[string]string {
-	userParameters["filename_placeholder_service_name"] = strings.ToLower(rpcParameters.ServiceName)
+	filepathPlaceHolders := make(map[string]string)
+	filepathPlaceHolders["service_name"] = rpcParameters.ServiceNameLower
 	tpls := g.getTplContents(tpl)
-	result := g.apply(tpls, rpcParameters, userParameters)
+	result := g.apply(tpls, rpcParameters, filepathPlaceHolders, userParameters)
 	return result
 }
 
 func (g *grpcGoGenerator) getTplContents(tpl string) map[string]string {
 	tplPath := tpl
+	console.Info("get code template from " + tplPath)
+
+	// read local templates
+	if strings.HasPrefix(tplPath, "file://") {
+		tplPath = strings.TrimPrefix(tplPath, "file://")
+		if strings.HasPrefix(tplPath, "~/") {
+			tplPath = strings.TrimPrefix(tplPath, "~/")
+			dirname, err := os.UserHomeDir()
+			console.FatalIfError(err)
+			tplPath = filepath.Join(dirname, tplPath)
+		}
+		tpls := g.getLocalTpls(tplPath)
+		return tpls
+	}
+
 	fromSkemaTemplateRepo := false
-	if !strings.HasPrefix(tpl, "https://") && !strings.HasPrefix(tpl, "http://") {
+	if !pattern.IsHttpUrl(tplPath) {
+		// shortcut name for skema template repository
 		defaultHostPath := "https://github.com/skema-dev/template/grpc-go"
 		tplPath = fmt.Sprintf("%s/%s", defaultHostPath, tpl)
 		fromSkemaTemplateRepo = true
 	}
-	console.Info("download code template from " + tplPath)
 
 	authProvider := auth.NewGithubAuthProvider()
 	repo := repository.NewGithubRepo(authProvider.GetLocalToken())
@@ -69,9 +90,33 @@ func (g *grpcGoGenerator) getTplContents(tpl string) map[string]string {
 	return tpls
 }
 
+func (g *grpcGoGenerator) getLocalTpls(startPath string) map[string]string {
+	tpls := make(map[string]string)
+	err := filepath.Walk(startPath, func(path string, info os.FileInfo, err error) error {
+		// read file path
+		console.Info(path)
+		console.FatalIfError(err)
+		if info == nil || info.IsDir() {
+			return nil
+		}
+		relativePath := strings.TrimPrefix(path, startPath)[1:]
+		logging.Debugf("tpl file: %s\n", relativePath)
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			logging.Errorf("failed to read %s\n", path)
+			return err
+		}
+		tpls[relativePath] = string(data)
+		return nil
+	})
+	console.FatalIfError(err)
+
+	return tpls
+}
+
 func (g *grpcGoGenerator) parseFilename(
 	tplFilepathName string,
-	userParameters map[string]string,
+	filepathPlaceholderNames map[string]string,
 ) string {
 	placeHolderStart := strings.Index(tplFilepathName, "$")
 	placeHolderEnd := strings.Index(tplFilepathName, "#")
@@ -80,8 +125,8 @@ func (g *grpcGoGenerator) parseFilename(
 	}
 
 	placeholder := tplFilepathName[placeHolderStart+1 : placeHolderEnd]
-	k := fmt.Sprintf("filename_placeholder_%s", placeholder)
-	v, ok := userParameters[k]
+	k := placeholder
+	v, ok := filepathPlaceholderNames[k]
 	if !ok {
 		console.Fatalf("missing filename placeholder %s", k)
 	}
@@ -97,21 +142,26 @@ func (g *grpcGoGenerator) parseFilename(
 func (g *grpcGoGenerator) apply(
 	tpls map[string]string,
 	parameters *RpcParameters,
+	filepathPlaceholderNames map[string]string,
 	userParameters map[string]string,
 ) map[string]string {
 	result := make(map[string]string)
 	console.Info("generating grpc service code...")
 	for tplFilepathName, tplContent := range tpls {
-		filename := g.parseFilename(tplFilepathName, userParameters)
+		filename := g.parseFilename(tplFilepathName, filepathPlaceholderNames)
 		filename = strings.TrimSuffix(filename, ".tpl")
 
 		tpl := template.Must(template.New(filename).Option("missingkey=zero").Parse(tplContent))
 		var content bytes.Buffer
 		err := tpl.Execute(&content, parameters)
-		if err != nil {
-			console.Fatalf(err.Error())
-		}
-		result[filename] = content.String()
+		console.FatalIfError(err)
+
+		var contentFinal bytes.Buffer
+		tplFinal := template.Must(template.New(filename + "_final").Option("missingkey=zero").Parse(content.String()))
+		err = tplFinal.Execute(&contentFinal, userParameters)
+		console.FatalIfError(err)
+
+		result[filename] = contentFinal.String()
 	}
 	return result
 }
