@@ -138,7 +138,9 @@ skbuild api publish -s ./temp -u stub --version v1.0.1 --username=<your git user
 
 ### 8. Cloud Native Local Dev Environment!!  
 After the code is generated (using the standard template), you'll have a "env" folder, which contains script for kubernetes cluster setup (via kind), and Dockerfile/docker-compose/k8s deploy config/deploy scripts/etc.  
+  
 Yes, we generate everything you need to pack your code into docker image, and play around with either docker-compose or local kubernetes cluster (the install script will add Kind on your machine).  
+  
 Not just generating the scripts/configurations, we also simplified and standardlized the cluster/service setup/deployment in our skbuild tool. You can simply run the following commands:  
 ```
 # create a kind cluster
