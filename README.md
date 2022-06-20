@@ -1,12 +1,6 @@
 # SkemaBuild
-Your One-Stop grpc-go boilerplate tool to generate production ready code from protobuf file AUTOMATICALLY, including:
-- Both gRPC and OpenAPI(swagger) stubs (ready to be imported)
-- gRPC Service with gRPC gateway (HTTP support) included
-- IaC support for middlewares (based on the [Skema-Go](https://github.com/skema-dev/skema-go) Framework)
-- Ready to use Dockerfile/docker-compose/Kubernetes cluster setup scripts 
-- Ready to deploy Kubernetes Deployment/Service configurations. 
-  
-It make gRPC developer's life easier by:  
+Your One-Stop command line tool to generate grpc-go code from protobuf file AUTOMATICALLY.  
+And it's dev ready and production ready!  
 - taking care of all necessary protocol buffers/grpc/plugins/dependencies installation  
 - publish grpc stubs automatically  
 - Support github and any other git repo host (e.g. gitlab, bitbucket, whatever)!!  
@@ -15,7 +9,7 @@ It make gRPC developer's life easier by:
 - Automatic Dockerfile/Docker-Compose/Kubernetes Deployment Setup!! No more hassle figuring out port-forwaring/NodePort/Ingress/etc. for just local dev debugging!  
 - It's FAST! Generating ready-to-go code from protocol buffers has never been so fast!!
   
-<img src="intro.jpg" style="width: 720px;"/>
+<img src="skemabuild.png" style="width: 720px;"/>
 
 ## Quick Start
 
