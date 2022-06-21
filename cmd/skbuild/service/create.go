@@ -1,18 +1,14 @@
 package service
 
 import (
-	"os"
+	"github.com/iancoleman/strcase"
 	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/skema-dev/skemabuild/internal/auth"
+	"github.com/skema-dev/skemabuild/internal/generator"
 	"github.com/skema-dev/skemabuild/internal/pkg/console"
-	"github.com/skema-dev/skemabuild/internal/pkg/http"
 	"github.com/skema-dev/skemabuild/internal/pkg/io"
-	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
-	"github.com/skema-dev/skemabuild/internal/pkg/repository"
-	"github.com/skema-dev/skemabuild/internal/service"
 	"github.com/spf13/cobra"
 )
 
@@ -35,60 +31,35 @@ func newCreateCmd() *cobra.Command {
 			tpl, _ := c.Flags().GetString("tpl")
 			s, _ := c.Flags().GetString("http")
 			httpEnabled, _ := strconv.ParseBool(s)
-			userParams, _ := c.Flags().GetString("parameters")
+			values, _ := c.Flags().GetString("value")
 
-			userParameters := map[string]string{}
-			if userParams != "" {
-				ss := strings.Split(userParams, ",")
+			userValues := map[string]string{}
+			if values != "" {
+				ss := strings.Split(values, ",")
 				for _, s := range ss {
 					kv := strings.Split(s, ":")
 					if len(kv) != 2 {
 						console.Fatalf("Invalid parameter: %s", s)
 					}
-					k := kv[0]
+					k := strcase.ToCamel(kv[0])
 					v := kv[1]
-					userParameters[k] = v
+					userValues[k] = v
 				}
 			}
 
-			var rpcParameters *service.RpcParameters
-			if pattern.IsGithubUrl(protoUrl) {
-				// use github client to get proto file
-				authProvider := auth.NewGithubAuthProvider()
-				repo := repository.NewGithubRepo(authProvider.GetLocalToken())
-				if repo == nil {
-					console.Fatalf("failed to initiate github repo")
-				}
-				repoName, repoPath, _ := service.GetGithubContentLocation(protoUrl)
-				console.Info("get remote proto on github: %s", protoUrl)
-				console.Info("Repo: %s\nPath: %s", repoName, repoPath)
-
-				content, err := repo.GetContents(repoName, repoPath)
-				if err != nil {
-					console.Fatalf(err.Error())
-				}
-				rpcParameters = service.GetRpcParameters(
-					content[repoPath],
-					goModule,
-					goVersion,
-					serviceName,
-				)
-			} else if pattern.IsHttpUrl(protoUrl) {
-				// get proto by regular http
-				console.Info("get remote proto: %s", protoUrl)
-				content := http.GetTextContent(protoUrl)
-				rpcParameters = service.GetRpcParameters(content, goModule, goVersion, serviceName)
-			} else {
-				// read from local path
-				data, err := os.ReadFile(protoUrl)
-				console.FatalIfError(err)
-				content := string(data)
-				rpcParameters = service.GetRpcParameters(content, goModule, goVersion, serviceName)
+			modelNames := make([]string, 0)
+			modelParams, _ := c.Flags().GetString("model")
+			if modelParams != "" {
+				modelNames = strings.Split(modelParams, ",")
 			}
-			rpcParameters.HttpEnabled = httpEnabled
 
-			generator := service.NewGrpcGoGenerator()
-			contents := generator.CreateCodeContent(tpl, rpcParameters, userParameters)
+			serviceTemplate := generator.CreateServiceTemplate().
+				WithRpcProtocol(protoUrl, goModule, goVersion, serviceName, httpEnabled).
+				WithDataModelNames(modelNames).
+				WithUserValues(userValues)
+
+			generator := generator.NewGrpcGoGenerator()
+			contents := generator.CreateCodeContent(tpl, serviceTemplate)
 
 			for path, c := range contents {
 				outputPath := filepath.Join(output, path)
@@ -102,10 +73,11 @@ func newCreateCmd() *cobra.Command {
 	cmd.Flags().StringP("module", "m", "", "go module name")
 	cmd.Flags().StringP("goversion", "v", "1.16", "go version")
 	cmd.Flags().StringP("service", "s", "", "service name")
-	cmd.Flags().StringP("tpl", "t", "standard", "template name or url")
+	cmd.Flags().StringP("tpl", "t", "skema-mux", "template name or url")
 	cmd.Flags().String("http", "true", "enable http or not")
 	cmd.Flags().StringP("output", "o", "", "output path")
-	cmd.Flags().String("parameter", "", "user defined tpl parameters: key1:value1,key2:value2...")
+	cmd.Flags().String("value", "", "user defined tpl parameters: key1:value1,key2:value2...")
+	cmd.Flags().String("model", "", "data models supported by skema-data")
 	cmd.MarkFlagRequired("proto")
 
 	return cmd

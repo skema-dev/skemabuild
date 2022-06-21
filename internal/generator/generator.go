@@ -1,4 +1,4 @@
-package service
+package generator
 
 import (
 	"bytes"
@@ -19,8 +19,7 @@ import (
 type Generator interface {
 	CreateCodeContent(
 		tpl string,
-		rpcParameters *RpcParameters,
-		userParameters map[string]string,
+		serviceTemplate *ServiceTemplate,
 	) map[string]string
 }
 
@@ -34,13 +33,12 @@ func NewGrpcGoGenerator() Generator {
 
 func (g *grpcGoGenerator) CreateCodeContent(
 	tpl string,
-	rpcParameters *RpcParameters,
-	userParameters map[string]string,
+	serviceTemplate *ServiceTemplate,
 ) map[string]string {
 	filepathPlaceHolders := make(map[string]string)
-	filepathPlaceHolders["service_name"] = rpcParameters.ServiceNameLower
+	filepathPlaceHolders["service_name"] = serviceTemplate.ServiceNameLower
 	tpls := g.getTplContents(tpl)
-	result := g.apply(tpls, rpcParameters, filepathPlaceHolders, userParameters)
+	result := g.apply(tpls, serviceTemplate, filepathPlaceHolders)
 	return result
 }
 
@@ -50,6 +48,7 @@ func (g *grpcGoGenerator) getTplContents(tpl string) map[string]string {
 
 	// read local templates
 	if strings.HasPrefix(tplPath, "file://") {
+		console.Info("get from local path")
 		tplPath = strings.TrimPrefix(tplPath, "file://")
 		if strings.HasPrefix(tplPath, "~/") {
 			tplPath = strings.TrimPrefix(tplPath, "~/")
@@ -141,27 +140,54 @@ func (g *grpcGoGenerator) parseFilename(
 
 func (g *grpcGoGenerator) apply(
 	tpls map[string]string,
-	parameters *RpcParameters,
+	serviceTemplate *ServiceTemplate,
 	filepathPlaceholderNames map[string]string,
-	userParameters map[string]string,
 ) map[string]string {
 	result := make(map[string]string)
 	console.Info("generating grpc service code...")
+
 	for tplFilepathName, tplContent := range tpls {
 		filename := g.parseFilename(tplFilepathName, filepathPlaceholderNames)
 		filename = strings.TrimSuffix(filename, ".tpl")
 
-		tpl := template.Must(template.New(filename).Option("missingkey=zero").Parse(tplContent))
-		var content bytes.Buffer
-		err := tpl.Execute(&content, parameters)
-		console.FatalIfError(err)
+		if strings.HasSuffix(filename, "$model.go") {
+			// special process for data models
+			modelPath := filepath.Dir(filename)
+			modelTpl := tplContent
+			models := g.applyDataModel(modelPath, modelTpl, serviceTemplate.DataModels)
+			for k, v := range models {
+				result[k] = v
+			}
+			continue
+		}
 
-		var contentFinal bytes.Buffer
-		tplFinal := template.Must(template.New(filename + "_final").Option("missingkey=zero").Parse(content.String()))
-		err = tplFinal.Execute(&contentFinal, userParameters)
-		console.FatalIfError(err)
-
-		result[filename] = contentFinal.String()
+		content := g.parseTemplate(filename, tplContent, serviceTemplate)
+		result[filename] = content
 	}
 	return result
+}
+
+func (g *grpcGoGenerator) applyDataModel(modelPath string, modelTpl string, dataModels []DataModelDescriptor) map[string]string {
+	result := make(map[string]string)
+	for _, model := range dataModels {
+		filename := filepath.Join(modelPath, model.ModelNameLowerCase+".go")
+		tpl := template.Must(template.New(filename).Option("missingkey=zero").Parse(modelTpl))
+		var content bytes.Buffer
+		err := tpl.Execute(&content, model)
+		console.FatalIfError(err)
+		result[filename] = content.String()
+	}
+	return result
+}
+
+func (g *grpcGoGenerator) parseTemplate(id string, tplContent string, serviceTemplate *ServiceTemplate) string {
+	tpl := template.Must(template.New(id).Option("missingkey=zero").Parse(tplContent))
+	var content bytes.Buffer
+	err := tpl.Execute(&content, serviceTemplate)
+	if err != nil {
+		console.Info(err.Error())
+		return tplContent
+	}
+	//console.FatalIfError(err)
+	return content.String()
 }
