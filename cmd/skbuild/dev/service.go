@@ -11,7 +11,7 @@ import (
 
 const (
 	serviceDescription           = "skbuild dev service -h"
-	serviceImageBuildDescription = "skbuild dev service imagebuild --name <service_name>"
+	serviceImageBuildDescription = "skbuild dev service build --name <service_name>"
 	serviceCreateDescription     = "skbuild dev service create --name <service_name>"
 	serviceDeleteDescription     = "skbuild dev service delete --name <service_name>"
 
@@ -37,7 +37,7 @@ func newServiceCmd() *cobra.Command {
 
 func newServiceImageBuildCmd() *cobra.Command {
 	var cmd = &cobra.Command{
-		Use:   "imagebuild",
+		Use:   "build",
 		Short: serviceImageBuildDescription,
 		Long:  serviceImageBuildDescription,
 		Run: func(c *cobra.Command, args []string) {

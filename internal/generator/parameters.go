@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
 	"github.com/jhump/protoreflect/desc/protoparse"
+	"github.com/skema-dev/skema-go/logging"
 	"github.com/skema-dev/skemabuild/internal/auth"
 	"github.com/skema-dev/skemabuild/internal/pkg/console"
 	"github.com/skema-dev/skemabuild/internal/pkg/http"
@@ -33,8 +34,8 @@ type ServiceTemplate struct {
 	GoVersion                string
 	GoPackageAddress         string
 	HttpEnabled              bool
-	OriginalServiceName      string
-	OriginalServiceNameLower string
+	ProtocolServiceName      string
+	ProtocolServiceNameLower string
 	ServiceName              string
 	ServiceNameCamelCase     string
 	ServiceNameLower         string
@@ -106,8 +107,8 @@ func (t *ServiceTemplate) WithRpcParameters(
 ) *ServiceTemplate {
 	t.GoModule = goModule
 	t.GoVersion = goVersion
-	t.OriginalServiceName = userServiceName
-	t.OriginalServiceNameLower = strings.ToLower(userServiceName)
+	t.ProtocolServiceName = userServiceName
+	t.ProtocolServiceNameLower = strings.ToLower(userServiceName)
 
 	descriptor := t.getProtobufFileDescriptor(protoContent)
 	t.GoPackageAddress = t.getOptionPackageAddress(descriptor)
@@ -125,9 +126,9 @@ func (t *ServiceTemplate) WithRpcParameters(
 			t.ServiceNameLower = strings.ToLower(t.ServiceName)
 		}
 
-		if t.OriginalServiceName == "" {
-			t.OriginalServiceName = serviceDescriptor.Name
-			t.OriginalServiceNameLower = strings.ToLower(serviceDescriptor.Name)
+		if t.ProtocolServiceName == "" {
+			t.ProtocolServiceName = serviceDescriptor.Name
+			t.ProtocolServiceNameLower = strings.ToLower(serviceDescriptor.Name)
 		}
 
 		if t.GoModule == "" {
@@ -222,6 +223,7 @@ func (t *ServiceTemplate) WithDataModelNames(modelNames []string) *ServiceTempla
 }
 
 func (t *ServiceTemplate) WithUserValues(values map[string]string) *ServiceTemplate {
+	logging.Debugf("User defined values: %v", values)
 	t.Value = values
 	return t
 }

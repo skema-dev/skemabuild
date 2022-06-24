@@ -10,7 +10,7 @@ import (
 
 const (
 	clusterDescription       = "skbuild dev cluster -h"
-	clusterCreateDescription = "skbuild dev cluster init [--name <cluster-name>] [-f <kind-cluster-init.yaml>]"
+	clusterCreateDescription = "skbuild dev cluster create [--name <cluster-name>] [-f <kind-cluster-init.yaml>]"
 	clusterDeleteDescription = "skbuild dev cluster destroy [--name <cluster-name>]"
 
 	defaultInitScript = "cluster_init.sh"

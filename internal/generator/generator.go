@@ -3,6 +3,8 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	"github.com/iancoleman/strcase"
+	"github.com/skema-dev/skema-go/config"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -36,7 +38,7 @@ func (g *grpcGoGenerator) CreateCodeContent(
 	serviceTemplate *ServiceTemplate,
 ) map[string]string {
 	filepathPlaceHolders := make(map[string]string)
-	filepathPlaceHolders["service_name"] = serviceTemplate.ServiceNameLower
+	filepathPlaceHolders["service_name"] = serviceTemplate.ProtocolServiceNameLower
 	tpls := g.getTplContents(tpl)
 	result := g.apply(tpls, serviceTemplate, filepathPlaceHolders)
 	return result
@@ -48,7 +50,6 @@ func (g *grpcGoGenerator) getTplContents(tpl string) map[string]string {
 
 	// read local templates
 	if strings.HasPrefix(tplPath, "file://") {
-		console.Info("get from local path")
 		tplPath = strings.TrimPrefix(tplPath, "file://")
 		if strings.HasPrefix(tplPath, "~/") {
 			tplPath = strings.TrimPrefix(tplPath, "~/")
@@ -93,11 +94,14 @@ func (g *grpcGoGenerator) getLocalTpls(startPath string) map[string]string {
 	tpls := make(map[string]string)
 	err := filepath.Walk(startPath, func(path string, info os.FileInfo, err error) error {
 		// read file path
-		console.Info(path)
-		console.FatalIfError(err)
+		if err != nil {
+			return err
+		}
+
 		if info == nil || info.IsDir() {
 			return nil
 		}
+
 		relativePath := strings.TrimPrefix(path, startPath)[1:]
 		logging.Debugf("tpl file: %s\n", relativePath)
 		data, err := ioutil.ReadFile(path)
@@ -146,6 +150,14 @@ func (g *grpcGoGenerator) apply(
 	result := make(map[string]string)
 	console.Info("generating grpc service code...")
 
+	templates := []string{"default.yaml", "default.yml"}
+	for _, f := range templates {
+		if content, ok := tpls[f]; ok {
+			g.applyDefaultTemplateValue(content, serviceTemplate)
+			break
+		}
+	}
+
 	for tplFilepathName, tplContent := range tpls {
 		filename := g.parseFilename(tplFilepathName, filepathPlaceholderNames)
 		filename = strings.TrimSuffix(filename, ".tpl")
@@ -190,4 +202,37 @@ func (g *grpcGoGenerator) parseTemplate(id string, tplContent string, serviceTem
 	}
 	//console.FatalIfError(err)
 	return content.String()
+}
+
+func (g *grpcGoGenerator) applyDefaultTemplateValue(templateYaml string, serviceTemplate *ServiceTemplate) {
+	logging.Debugf("existing uservalues: %v", serviceTemplate.Value)
+	conf := config.NewConfigWithString(templateYaml)
+
+	if len(serviceTemplate.DataModels) == 0 {
+		models := conf.GetStringArray("models")
+		for _, v := range models {
+			m := DataModelDescriptor{
+				ModelNameCamelCase: strcase.ToCamel(v),
+				ModelNameLowerCase: strings.ToLower(v),
+			}
+			console.Infof("add default data model: %s\n", m.ModelNameLowerCase)
+			serviceTemplate.DataModels = append(serviceTemplate.DataModels, m)
+
+			if serviceTemplate.DefaultDataModelNameLowerCase == "" {
+				serviceTemplate.DefaultDataModelNameLowerCase = m.ModelNameLowerCase
+				serviceTemplate.DefaultDataModelNameCamelCase = m.ModelNameCamelCase
+			}
+		}
+	}
+
+	values := conf.GetMapFromArray("values")
+	for k, v := range values {
+		k = strcase.ToCamel(k)
+		if userValue, ok := serviceTemplate.Value[k]; !ok {
+			serviceTemplate.Value[k] = v.(string)
+			console.Infof("apply default template value: %s=>%s\n", k, v.(string))
+		} else {
+			console.Infof("template key: %s (%s), user defined: %s\n", k, v.(string), userValue)
+		}
+	}
 }
