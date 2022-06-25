@@ -52,4 +52,27 @@ skbuild -f e2e.yaml
 ```
 It's going to go through all the process from uploading stubs, packaging via git tag, get online template, generate code and even kubernetes deployment config!  
 
+If you already have your protocol buffers file online. you may skip the proto packaging step in the yaml file. For example, in `/example` folder, you may use the `service_only.yaml` to generate code without manipulating stubs:  
+```
+# service_only.yaml
+api:
+  proto: test1.proto
+
+service:
+  name: mytestservice
+  template:
+    models:
+      - user
+      - message
+    values:
+      - mysql_server_name: mysql-svc
+      - mysql_password: abcd1234
+      - grpc_port: "9991"
+      - http_port: "9992"
+```
+run command:  
+```
+skbuild -f service_only.yaml
+```
+
 For detailed introduction, checkout [Feature Introduction](./features.md)
