@@ -45,7 +45,9 @@ service:
       - grpc_port: "9991"
       - http_port: "9992"
 ```
-*Make sure you have a proto file ready (test1.proto) and defined go_package address inside*  
+`Make sure you have a proto file ready (test1.proto) and defined go_package address inside`  
+`If not, you may use the *test1.proto* in /sample folder, but change the go_package to your own repo` 
+
 Then simply run:  
 ```
 skbuild -f e2e.yaml
