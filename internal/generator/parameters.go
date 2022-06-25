@@ -1,10 +1,10 @@
 package generator
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
 	"github.com/jhump/protoreflect/desc/protoparse"
-	"github.com/skema-dev/skema-go/logging"
 	"github.com/skema-dev/skemabuild/internal/auth"
 	"github.com/skema-dev/skemabuild/internal/pkg/console"
 	"github.com/skema-dev/skemabuild/internal/pkg/http"
@@ -60,16 +60,16 @@ func CreateServiceTemplate() *ServiceTemplate {
 	return serviceTemplate
 }
 
-func (t *ServiceTemplate) WithRpcProtocol(protoUrl string, goModule string, goVersion string, serviceName string, httpEnabled bool) *ServiceTemplate {
-	if pattern.IsGithubUrl(protoUrl) {
+func (t *ServiceTemplate) WithRpcProtocol(protoUri string, goModule string, goVersion string, serviceName string, httpEnabled bool) *ServiceTemplate {
+	if pattern.IsGithubUrl(protoUri) {
 		// use github client to get proto file
 		authProvider := auth.NewGithubAuthProvider()
 		repo := repository.NewGithubRepo(authProvider.GetLocalToken())
 		if repo == nil {
 			console.Fatalf("failed to initiate github repo")
 		}
-		repoName, repoPath, _ := GetGithubContentLocation(protoUrl)
-		console.Info("get remote proto on github: %s", protoUrl)
+		repoName, repoPath, _ := GetGithubContentLocation(protoUri)
+		console.Info("get remote proto on github: %s", protoUri)
 		console.Info("Repo: %s\nPath: %s", repoName, repoPath)
 
 		content, err := repo.GetContents(repoName, repoPath)
@@ -82,15 +82,15 @@ func (t *ServiceTemplate) WithRpcProtocol(protoUrl string, goModule string, goVe
 			goVersion,
 			serviceName,
 		)
-	} else if pattern.IsHttpUrl(protoUrl) {
+	} else if pattern.IsHttpUrl(protoUri) {
 		// get proto by regular http
-		console.Info("get remote proto: %s", protoUrl)
-		content := http.GetTextContent(protoUrl)
+		console.Info("get remote proto: %s", protoUri)
+		content := http.GetTextContent(protoUri)
 		t = t.WithRpcParameters(content, goModule, goVersion, serviceName)
 	} else {
 		// read from local path
-		data, err := os.ReadFile(protoUrl)
-		console.FatalIfError(err)
+		data, err := os.ReadFile(protoUri)
+		console.FatalIfError(err, fmt.Sprintf("Failed reading proto from \"%s\" ", protoUri))
 		content := string(data)
 		t = t.WithRpcParameters(content, goModule, goVersion, serviceName)
 	}
@@ -223,7 +223,6 @@ func (t *ServiceTemplate) WithDataModelNames(modelNames []string) *ServiceTempla
 }
 
 func (t *ServiceTemplate) WithUserValues(values map[string]string) *ServiceTemplate {
-	logging.Debugf("User defined values: %v", values)
 	t.Value = values
 	return t
 }

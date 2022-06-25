@@ -1,0 +1,14 @@
+api:
+  proto: test1.proto
+
+service:
+  name: mytestservice
+  template:
+    models:
+      - user
+      - message
+    values:
+      - mysql_server_name: mysql-svc
+      - mysql_password: abcd1234
+      - grpc_port: "9991"
+      - http_port: "9992"

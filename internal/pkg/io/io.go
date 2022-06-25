@@ -1,6 +1,9 @@
 package io
 
 import (
+	"github.com/skema-dev/skemabuild/internal/pkg/console"
+	"github.com/skema-dev/skemabuild/internal/pkg/http"
+	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
 	"io"
 	"os"
 	"path/filepath"
@@ -43,4 +46,18 @@ func GetHomePath() string {
 		panic("SKEMA_HOME not set!")
 	}
 	return path
+}
+
+func GetContentFromUri(uri string) string {
+	var content string
+	if pattern.IsHttpUrl(uri) {
+		content = http.GetTextContent(uri)
+	} else if pattern.IsGithubUrl(uri) {
+		console.Fatalf("please use the raw content link for github proto file")
+	} else {
+		data, err := os.ReadFile(uri)
+		console.FatalIfError(err, "failed to read from "+uri)
+		content = string(data)
+	}
+	return content
 }

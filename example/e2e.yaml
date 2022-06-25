@@ -1,0 +1,23 @@
+api:
+  proto: test1.proto
+  stubs:
+    - grpc-go
+    - openapi
+
+  version: v0.0.6
+  path: https://github.com/likezhang-public/newst001/test001
+
+service:
+  name: mytestservice
+  template:
+    models:
+      - user
+      - message
+    values:
+      - mysql_server_name: mysql-svc
+      - mysql_password: abcd1234
+      - grpc_port: "9991"
+      - http_port: "9992"
+
+
+

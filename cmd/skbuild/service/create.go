@@ -17,13 +17,25 @@ const (
 	createLongDescription = "skbuild service create --proto=<protobuf_uri>"
 )
 
+type ServiceGeneratorParameters struct {
+	ProtoUri    string
+	GoModule    string
+	GoVersion   string
+	ServiceName string
+	Output      string
+	Tpl         string
+	HttpEnabled bool
+	Values      map[string]string
+	Models      []string
+}
+
 func newCreateCmd() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "create",
 		Short: createDescription,
 		Long:  createLongDescription,
 		Run: func(c *cobra.Command, args []string) {
-			protoUrl := c.Flag("proto").Value.String()
+			protoUri := c.Flag("proto").Value.String()
 			goModule := c.Flag("module").Value.String()
 			goVersion, _ := c.Flags().GetString("goversion")
 			serviceName, _ := c.Flags().GetString("service")
@@ -53,19 +65,19 @@ func newCreateCmd() *cobra.Command {
 				modelNames = strings.Split(modelParams, ",")
 			}
 
-			serviceTemplate := generator.CreateServiceTemplate().
-				WithRpcProtocol(protoUrl, goModule, goVersion, serviceName, httpEnabled).
-				WithDataModelNames(modelNames).
-				WithUserValues(userValues)
-
-			generator := generator.NewGrpcGoGenerator()
-			contents := generator.CreateCodeContent(tpl, serviceTemplate)
-
-			for path, c := range contents {
-				outputPath := filepath.Join(output, path)
-				io.SaveToFile(outputPath, []byte(c))
-				console.Info(outputPath)
+			params := &ServiceGeneratorParameters{
+				ProtoUri:    protoUri,
+				GoModule:    goModule,
+				GoVersion:   goVersion,
+				ServiceName: serviceName,
+				Output:      output,
+				Tpl:         tpl,
+				HttpEnabled: httpEnabled,
+				Values:      userValues,
+				Models:      modelNames,
 			}
+
+			CreateServiceCode(params)
 		},
 	}
 
@@ -81,4 +93,20 @@ func newCreateCmd() *cobra.Command {
 	cmd.MarkFlagRequired("proto")
 
 	return cmd
+}
+
+func CreateServiceCode(params *ServiceGeneratorParameters) {
+	serviceTemplate := generator.CreateServiceTemplate().
+		WithRpcProtocol(params.ProtoUri, params.GoModule, params.GoVersion, params.ServiceName, params.HttpEnabled).
+		WithDataModelNames(params.Models).
+		WithUserValues(params.Values)
+
+	generator := generator.NewGrpcGoGenerator()
+	contents := generator.CreateCodeContent(params.Tpl, serviceTemplate)
+
+	for path, c := range contents {
+		outputPath := filepath.Join(params.Output, path)
+		io.SaveToFile(outputPath, []byte(c))
+		console.Info(outputPath)
+	}
 }

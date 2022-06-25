@@ -1,9 +1,6 @@
 package api
 
 import (
-	"github.com/skema-dev/skemabuild/internal/pkg/http"
-	"github.com/skema-dev/skemabuild/internal/pkg/pattern"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -34,7 +31,7 @@ func newCreateCmd() *cobra.Command {
 				logging.Init("debug", "console")
 			}
 
-			content := getContentFromInputPath(input)
+			content := io.GetContentFromUri(input)
 			stubs, err := generateStubsFromProto(content, stubTypes, goOption)
 			console.FatalIfError(err)
 
@@ -88,20 +85,6 @@ func generateStubsFromProto(
 			stubs[stubFilePath] = v
 		}
 	}
-	logging.Debugf("%v", stubs)
+	//logging.Debugf("%v", stubs)
 	return stubs, nil
-}
-
-func getContentFromInputPath(input string) string {
-	var content string
-	if pattern.IsHttpUrl(input) {
-		content = http.GetTextContent(input)
-	} else if pattern.IsGithubUrl(input) {
-		console.Fatalf("please use the raw content link for github proto file")
-	} else {
-		data, err := os.ReadFile(input)
-		console.FatalIfError(err, "failed to read from "+input)
-		content = string(data)
-	}
-	return content
 }

@@ -60,6 +60,9 @@ func (s *goStubCreator) Generate(protobufContent string) (map[string]string, err
 		return nil, err
 	}
 
+	goModContent := generateGoMod(s.packageOption)
+	result["go.mod"] = goModContent
+
 	return result, nil
 }
 
@@ -79,7 +82,7 @@ func GetExpectedGithubGoPackageUri(uploadUrl string, protobufContent string) str
 	return packagePath
 }
 
-func GenerateGoMod(packagePath string) string {
+func generateGoMod(packagePath string) string {
 	tpl := template.Must(template.New("default").Option("missingkey=zero").Parse(goModTemplate))
 
 	userValues := map[string]string{
