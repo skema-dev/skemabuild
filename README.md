@@ -3,9 +3,9 @@ Your One-Stop dev tool to generate grpc-go code from protobuf file AUTOMATICALLY
   
 <img src="skemabuild.png" style="width: 720px;"/>
 
-## Quick Start
+# Quick Start
 
-### 1. Installation  
+## 1. Installation  
 First, make sure you have golang installed.  
 Then setup necessary protocol buffers related tools:  
 ```shell
@@ -13,14 +13,14 @@ Then setup necessary protocol buffers related tools:
 ```
 <hr/>
 
-### 2. (Optional) Get Github Device Auth (if you want to publish protobuf&stubs on github)
+## 2. (Optional) Get Github Device Auth (if you want to publish protobuf&stubs on github)
 ```
 skbuild auth
 ```
 You'll be prompted to open github device auth URL and input the token. Then just press Enter to save the github token on your local device.
 <hr/>
 
-### 3. Init and Publish Protobuf API  
+## 3. Generate Stubs, Codes, and even Kubernetes Deployment Config from an extremely simple yaml  
 The most straightforward way to get everything done is by using a yaml file like below:
 ```
 # e2e.yaml
