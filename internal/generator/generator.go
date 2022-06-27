@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/iancoleman/strcase"
 	"github.com/skema-dev/skema-go/config"
+	"github.com/skema-dev/skemabuild/internal/api"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -169,6 +170,22 @@ func (g *grpcGoGenerator) apply(
 			models := g.applyDataModel(modelPath, modelTpl, serviceTemplate.DataModels)
 			for k, v := range models {
 				result[k] = v
+			}
+			continue
+		}
+
+		if serviceTemplate.HttpEnabled && strings.HasSuffix(filename, "swagger.json") {
+			// special treatment for swagger
+			stubCreator := api.NewOpenapiStubCreator()
+			stubs, err := stubCreator.Generate(serviceTemplate.ProtocolContent)
+			if err != nil {
+				console.Errorf("failed to generate openapi: %s", err.Error())
+			}
+			for stubName, stubContent := range stubs {
+				if strings.HasSuffix(stubName, "swagger.json") {
+					result[filename] = stubContent
+					break
+				}
 			}
 			continue
 		}

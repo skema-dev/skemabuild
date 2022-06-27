@@ -25,8 +25,9 @@ type ServiceGeneratorParameters struct {
 	Output      string
 	Tpl         string
 	HttpEnabled bool
-	Values      map[string]string
-	Models      []string
+
+	Values map[string]string
+	Models []string
 }
 
 func newCreateCmd() *cobra.Command {

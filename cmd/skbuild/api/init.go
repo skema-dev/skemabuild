@@ -49,10 +49,16 @@ func newInitCmd() *cobra.Command {
 			protoFilepath := filepath.Join(path, userService+".proto")
 			io.SaveToFile(protoFilepath, []byte(protoContent))
 			console.Info(
-				"New Protobuf file Created: %s\n==================\n%s\n",
+				"New Protobuf file Created: %s\n==================\n%s\n==================\n%s\n",
 				protoFilepath,
 				protoContent,
+				"change the {{ .Options }} to your package address if necessary.",
 			)
+
+			setupFilepath := filepath.Join(path, userService+".yaml")
+			setupYamlContent, err := apiCreator.InitSetupFile(userService)
+			io.SaveToFile(setupFilepath, []byte(setupYamlContent))
+			console.Infof(setupFilepath + " created. \nModify the file and then execute `skbuild -f service.yaml` to generate everything\n")
 		},
 	}
 

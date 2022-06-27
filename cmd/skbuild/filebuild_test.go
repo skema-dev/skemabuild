@@ -29,7 +29,7 @@ api:
 
 service:
   name: mytestservice
-  tpl: skema-db
+  tpl: skema-complete
   template:
     models:
       - user
@@ -55,6 +55,6 @@ service:
 
 	assert.Equal(s.T(), serviceParams.ServiceName, "mytestservice")
 	assert.Equal(s.T(), len(serviceParams.Models), 2)
-	assert.Equal(s.T(), serviceParams.Tpl, "skema-db")
+	assert.Equal(s.T(), serviceParams.Tpl, "skema-complete")
 	assert.Equal(s.T(), len(serviceParams.Values), 4)
 }

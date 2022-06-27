@@ -34,8 +34,10 @@ type ServiceTemplate struct {
 	GoVersion                string
 	GoPackageAddress         string
 	HttpEnabled              bool
+	SwaggerEnabled           bool
 	ProtocolServiceName      string
 	ProtocolServiceNameLower string
+	ProtocolContent          string
 	ServiceName              string
 	ServiceNameCamelCase     string
 	ServiceNameLower         string
@@ -95,7 +97,6 @@ func (t *ServiceTemplate) WithRpcProtocol(protoUri string, goModule string, goVe
 		t = t.WithRpcParameters(content, goModule, goVersion, serviceName)
 	}
 	t.HttpEnabled = httpEnabled
-
 	return t
 }
 
@@ -105,6 +106,7 @@ func (t *ServiceTemplate) WithRpcParameters(
 	goVersion string,
 	userServiceName string,
 ) *ServiceTemplate {
+	t.ProtocolContent = protoContent
 	t.GoModule = goModule
 	t.GoVersion = goVersion
 	t.ProtocolServiceName = userServiceName

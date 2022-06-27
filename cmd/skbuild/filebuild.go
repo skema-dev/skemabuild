@@ -58,7 +58,10 @@ func ParseServiceConfig(conf *config.Config) *service.ServiceGeneratorParameters
 	}
 
 	serviceParams.ProtoUri = conf.GetString("api.proto")
-	serviceParams.Tpl = conf.GetString("service.tpl", "skema-db")
+	serviceParams.Tpl = conf.GetString("service.tpl", "skema-complete")
+	serviceParams.HttpEnabled = conf.GetBool("service.http_enabled", true)
+	serviceParams.GoVersion = conf.GetString("go_version", "1.16")
+	serviceParams.GoModule = serviceParams.ServiceName
 
 	return &serviceParams
 }
