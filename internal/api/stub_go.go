@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"github.com/skema-dev/skema-go/logging"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -21,6 +22,8 @@ func NewGoStubCreator(packageOption string) StubCreator {
 	if packageOption == "" {
 		console.Fatalf("must define go package option")
 	}
+
+	packageOption = strings.ReplaceAll(packageOption, "//", "/")
 
 	return &goStubCreator{
 		packageOption: packageOption,
@@ -83,6 +86,7 @@ func GetExpectedGithubGoPackageUri(uploadUrl string, protobufContent string) str
 }
 
 func generateGoMod(packagePath string) string {
+	logging.Debugf("Generate go.mod from package path: %s\n", packagePath)
 	tpl := template.Must(template.New("default").Option("missingkey=zero").Parse(goModTemplate))
 
 	userValues := map[string]string{

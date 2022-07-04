@@ -46,12 +46,16 @@ func NewGithubRepo(token string) Repository {
 }
 
 func ParseGithubUrl(url string) (string, string, string) {
-	r := "(https://){0,1}github\\.com/(?P<organization_name>[a-zA-Z0-9-_]+)/(?P<repo_name>[a-zA-Z0-9-_]+)/(tree/main/){0,1}(?P<repo_path>[a-zA-Z0-9.\\-_\\/]+)"
+	logging.Debugf("parse url: %s\n", url)
+	r := `(https://){0,1}github\.com/(?P<organization_name>[a-zA-Z0-9-_]+)/(?P<repo_name>[a-zA-Z0-9-_]+)(/(tree/main/){0,1}(?P<repo_path>[a-zA-Z0-9.-_]*)){0,1}`
 	found := pattern.GetNamedMapFromText(
 		url,
 		r,
 		[]string{"organization_name", "repo_name", "repo_path"},
 	)
+	if _, ok := found["repo_path"]; !ok {
+		found["repo_path"] = ""
+	}
 
 	return found["organization_name"], found["repo_name"], found["repo_path"]
 }
@@ -161,7 +165,7 @@ func (g *GithubRepo) getRepository(
 	}
 
 	if organization != g.username {
-		return nil, fmt.Errorf("creating new repo in orgnization should be done via github")
+		return nil, fmt.Errorf("creating new repo in orgnization should be done via github. orgnization %s, github user: %s\n", organization, g.username)
 	}
 
 	owner, _, err := g.client.Users.Get(g.ctx, g.username)
